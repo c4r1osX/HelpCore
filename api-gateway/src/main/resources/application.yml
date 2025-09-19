@@ -1,0 +1,121 @@
+spring:
+  application:
+    name: api-gateway
+
+  profiles:
+    active: dev
+
+  # Cloud Gateway - Configuración de ruteo
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+      # Configuración de rutas estáticas y dinámicas
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: auth-service-cb
+                fallbackUri: forward:/fallback/auth
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+                key-resolver: "#{@userKeyResolver}"
+
+      # Configuración global de filtros
+      default-filters:
+        - name: AddResponseHeader
+          args:
+            name: X-API-Gateway
+            value: Ticketing-System-Gateway
+        - name: AddResponseHeader
+          args:
+            name: X-Response-Time
+            value: "#{T(System).currentTimeMillis()}"
+
+# ===== SERVIDOR =====
+server:
+  port: 8080
+  error:
+    include-message: always
+
+# ===== EUREKA CLIENT =====
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.profiles.active}:${random.value}
+
+# ===== CONFIG SERVER =====
+spring.config.import: "optional:configserver:http://localhost:8888"
+
+# ===== REDIS (Rate Limiting) =====
+spring.redis:
+  host: localhost
+  port: 6379
+  timeout: 2000ms
+
+# ===== RESILIENCE4J (Circuit Breaker) =====
+resilience4j:
+  circuitbreaker:
+    instances:
+      auth-service-cb:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 3
+
+      user-service-cb:
+        registerHealthIndicator: true
+        slidingWindowSize: 15
+        failureRateThreshold: 60
+        waitDurationInOpenState: 45s
+        permittedNumberOfCallsInHalfOpenState: 5
+
+      ticket-service-cb:
+        registerHealthIndicator: true
+        slidingWindowSize: 20
+        failureRateThreshold: 40
+        waitDurationInOpenState: 60s
+        permittedNumberOfCallsInHalfOpenState: 3
+
+# ===== ACTUATOR (Health Checks) =====
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,circuitbreakers,gateway
+  endpoint:
+    health:
+      show-details: always
+  info:
+    env:
+      enabled: true
+
+# ===== JWT CONFIGURATION =====
+jwt:
+  secret: mySecretKey123456789012345678901234567890
+  expiration: 86400000  # 24 horas en milliseconds
+
+# ===== LOGGING =====
+logging:
+  level:
+    com.ticketing.gateway: DEBUG
+    org.springframework.cloud.gateway: INFO
+    org.springframework.security: INFO
+    io.github.resilience4j: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
