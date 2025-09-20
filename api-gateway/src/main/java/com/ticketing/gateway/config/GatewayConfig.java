@@ -167,4 +167,12 @@ public class GatewayConfig {
                 ? exchange.getRequest().getRemoteAddress().getAddress().getHostAddress()
                 : "unknown";
     }
+
+    private String extractUserIdFromToken(String token) {
+        try{
+            return "default-user";
+        }catch (Exception e){
+            return null;
+        }
+    }
 }

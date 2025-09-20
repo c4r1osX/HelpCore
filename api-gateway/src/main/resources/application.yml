@@ -5,7 +5,6 @@ spring:
   profiles:
     active: dev
 
-  # Cloud Gateway - Configuración de ruteo
   cloud:
     gateway:
       discovery:
@@ -13,24 +12,28 @@ spring:
           enabled: true
           lower-case-service-id: true
 
-      # Configuración de rutas estáticas y dinámicas
       routes:
+        # ===== AUTH SERVICE =====
         - id: auth-service
           uri: lb://auth-service
           predicates:
             - Path=/api/auth/**
           filters:
+            - name: RewritePath
+              args:
+                regexp: /api/auth/(?<segment>.*)
+                replacement: /auth/${segment}
             - name: CircuitBreaker
               args:
                 name: auth-service-cb
                 fallbackUri: forward:/fallback/auth
-            - name: RequestRateLimiter
+            - name: RequestRateLimiter  # Rate limiting
               args:
-                redis-rate-limiter.replenishRate: 10
-                redis-rate-limiter.burstCapacity: 20
-                key-resolver: "#{@userKeyResolver}"
+                redis-rate-limiter.replenishRate: 10   # 10 requests por segundo
+                redis-rate-limiter.burstCapacity: 20   # MÃ¡ximo 20 requests en burst
+                key-resolver: "#{@ipKeyResolver}"      # Usar IP porque no hay JWT en auth
 
-      # Configuración global de filtros
+      # ConfiguraciÃ³n global de filtros
       default-filters:
         - name: AddResponseHeader
           args:
@@ -41,7 +44,7 @@ spring:
             name: X-Response-Time
             value: "#{T(System).currentTimeMillis()}"
 
-# ===== SERVIDOR =====
+
 server:
   port: 8080
   error:
@@ -58,7 +61,6 @@ eureka:
     prefer-ip-address: true
     instance-id: ${spring.application.name}:${spring.profiles.active}:${random.value}
 
-# ===== CONFIG SERVER =====
 spring.config.import: "optional:configserver:http://localhost:8888"
 
 # ===== REDIS (Rate Limiting) =====
@@ -73,49 +75,35 @@ resilience4j:
     instances:
       auth-service-cb:
         registerHealthIndicator: true
-        slidingWindowSize: 10
-        failureRateThreshold: 50
-        waitDurationInOpenState: 30s
-        permittedNumberOfCallsInHalfOpenState: 3
-
-      user-service-cb:
-        registerHealthIndicator: true
-        slidingWindowSize: 15
-        failureRateThreshold: 60
-        waitDurationInOpenState: 45s
-        permittedNumberOfCallsInHalfOpenState: 5
-
-      ticket-service-cb:
-        registerHealthIndicator: true
-        slidingWindowSize: 20
-        failureRateThreshold: 40
-        waitDurationInOpenState: 60s
-        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10          # Ventana de 10 requests
+        failureRateThreshold: 50       # 50% de fallos para abrir circuito
+        waitDurationInOpenState: 30s   # Esperar 30s antes de intentar de nuevo
+        permittedNumberOfCallsInHalfOpenState: 3  # 3 llamadas en half-open
 
 # ===== ACTUATOR (Health Checks) =====
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,circuitbreakers,gateway
+        include: health,info,metrics,circuitbreakers,gateway  # Endpoints expuestos
   endpoint:
     health:
-      show-details: always
+      show-details: always  # Mostrar detalles de health checks
   info:
     env:
       enabled: true
 
 # ===== JWT CONFIGURATION =====
 jwt:
-  secret: mySecretKey123456789012345678901234567890
-  expiration: 86400000  # 24 horas en milliseconds
+  secret: QmFzZTY0RW5jb2RlZEtleVNlZ3VyYUV4YW1wbGVEYXRhIQ==  # Mismo secret que auth-service
+  expiration: 86400000  # 24 horas en milliseconds (para producciÃ³n)
 
 # ===== LOGGING =====
 logging:
   level:
-    com.ticketing.gateway: DEBUG
-    org.springframework.cloud.gateway: INFO
-    org.springframework.security: INFO
-    io.github.resilience4j: INFO
+    com.ticketing.gateway: DEBUG              # Debug para nuestro cÃ³digo
+    org.springframework.cloud.gateway: INFO   # Info para Gateway
+    org.springframework.security: INFO        # Info para Security
+    io.github.resilience4j: INFO             # Info para Circuit Breaker
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
