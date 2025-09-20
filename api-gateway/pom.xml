@@ -20,45 +20,53 @@
 
 	<properties>
 		<java.version>21</java.version>
-		<spring-cloud.version>2025.0.0</spring-cloud.version>
+		<!-- CORRECCIÓN: Versión compatible con Spring Boot 3.3.4 -->
+		<spring-cloud.version>2023.0.3</spring-cloud.version>
 	</properties>
 
 	<dependencies>
-		<!-- Springboot Actuator -->
+		<!-- Springboot Actuator - Para métricas y health checks -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
-		<!-- SpringData Redis -->
+
+		<!-- SpringData Redis - Para rate limiting y caching -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis</artifactId>
 		</dependency>
-		<!-- Spring Security -->
+
+		<!-- Spring Security - Para seguridad en el gateway -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
-		<!-- Spring Reactive Web -->
+
+		<!-- CORRECCIÓN: WebFlux es CORRECTO para Gateway reactivo -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
-		<!-- Spring Cloud Config -->
+
+		<!-- Spring Cloud Config - Para configuración centralizada -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-config</artifactId>
 		</dependency>
-		<!-- GATEWAY - Spring Cloud Routing -->
+
+		<!-- CORRECCIÓN CRÍTICA: Gateway REACTIVO, no MVC -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-gateway-server-webmvc</artifactId>
+			<artifactId>spring-cloud-starter-gateway</artifactId>
 		</dependency>
-		<!-- Spring Cloud Discovery-->
+
+		<!-- Spring Cloud Discovery - Registro de servicios EUREKA-->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 		</dependency>
+
 		<!-- Springboot DevTools -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -66,24 +74,28 @@
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
+
 		<!-- Springboot Starter Test -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- ReactorTest, Testing especifico para programacion reactiva -->
+
+		<!-- ReactorTest - Testing para programación reactiva -->
 		<dependency>
 			<groupId>io.projectreactor</groupId>
 			<artifactId>reactor-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 		<!-- Spring Security Test -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 		<!-- JWT tokens -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
@@ -102,7 +114,8 @@
 			<version>0.12.3</version>
 			<scope>runtime</scope>
 		</dependency>
-		<!-- Resilience4j Circuit Breaker -->
+
+		<!-- Resilience4j Circuit Breaker - Fallos -->
 		<dependency>
 			<groupId>io.github.resilience4j</groupId>
 			<artifactId>resilience4j-spring-boot3</artifactId>
