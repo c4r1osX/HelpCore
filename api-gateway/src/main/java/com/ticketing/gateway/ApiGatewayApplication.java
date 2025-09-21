@@ -2,6 +2,7 @@ package com.ticketing.gateway;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 // - Punto de entrada único para todas las peticiones del frontend
 // - Ruteo hacia microservicios
@@ -11,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 // - Balanceo de carga automático
 
 @SpringBootApplication
+@EnableDiscoveryClient
 public class ApiGatewayApplication {
 
 	public static void main(String[] args) {

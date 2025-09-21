@@ -12,10 +12,11 @@ spring:
           enabled: true
           lower-case-service-id: true
 
+      # Configuración de rutas estáticas y dinámicas
       routes:
         # ===== AUTH SERVICE =====
         - id: auth-service
-          uri: lb://auth-service
+          uri: http://localhost:8081
           predicates:
             - Path=/api/auth/**
           filters:
@@ -33,7 +34,6 @@ spring:
                 redis-rate-limiter.burstCapacity: 20   # Máximo 20 requests en burst
                 key-resolver: "#{@ipKeyResolver}"      # Usar IP porque no hay JWT en auth
 
-      # Configuración global de filtros
       default-filters:
         - name: AddResponseHeader
           args:
@@ -61,6 +61,7 @@ eureka:
     prefer-ip-address: true
     instance-id: ${spring.application.name}:${spring.profiles.active}:${random.value}
 
+# ===== CONFIG SERVER =====
 spring.config.import: "optional:configserver:http://localhost:8888"
 
 # ===== REDIS (Rate Limiting) =====
@@ -75,9 +76,9 @@ resilience4j:
     instances:
       auth-service-cb:
         registerHealthIndicator: true
-        slidingWindowSize: 10          # Ventana de 10 requests
-        failureRateThreshold: 50       # 50% de fallos para abrir circuito
-        waitDurationInOpenState: 30s   # Esperar 30s antes de intentar de nuevo
+        slidingWindowSize: 10                     # Ventana de 10 requests
+        failureRateThreshold: 50                  # 50% de fallos para abrir circuito
+        waitDurationInOpenState: 30s              # Esperar 30s antes de intentar de nuevo
         permittedNumberOfCallsInHalfOpenState: 3  # 3 llamadas en half-open
 
 # ===== ACTUATOR (Health Checks) =====
@@ -85,25 +86,25 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,circuitbreakers,gateway  # Endpoints expuestos
+        include: health,info,metrics,circuitbreakers,gateway
   endpoint:
     health:
-      show-details: always  # Mostrar detalles de health checks
+      show-details: always
   info:
     env:
       enabled: true
 
 # ===== JWT CONFIGURATION =====
 jwt:
-  secret: QmFzZTY0RW5jb2RlZEtleVNlZ3VyYUV4YW1wbGVEYXRhIQ==  # Mismo secret que auth-service
-  expiration: 86400000  # 24 horas en milliseconds (para producción)
+  secret: QmFzZTY0RW5jb2RlZEtleVNlZ3VyYUV4YW1wbGVEYXRhIQ==
+  expiration: 60000
 
 # ===== LOGGING =====
 logging:
   level:
-    com.ticketing.gateway: DEBUG              # Debug para nuestro código
-    org.springframework.cloud.gateway: INFO   # Info para Gateway
-    org.springframework.security: INFO        # Info para Security
-    io.github.resilience4j: INFO             # Info para Circuit Breaker
+    com.ticketing.gateway: DEBUG
+    org.springframework.cloud.gateway: INFO
+    org.springframework.security: INFO
+    io.github.resilience4j: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"

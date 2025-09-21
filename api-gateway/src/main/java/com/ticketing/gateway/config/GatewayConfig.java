@@ -5,132 +5,40 @@ import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-
 
 //- Rutas dinámicas
 //- Resolvers para rate limiting
 //- Fallbacks para circuit breaker
-
 @Configuration
 public class GatewayConfig {
+
+    @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder){
         return builder.routes()
 
-                // RUTA PARA HEALTH CHECK GLOBAL
+                // Ruta para documentación
+                .route("docs", r -> r
+                        .path("/api/docs/**")
+                        .uri("http://localhost:8080"))
+
+                // Ruta para health check
                 .route("health-check", r -> r
                         .path("/health")
-                        .uri("http://localhost:8080")
-                        .filters(f -> f
-                                .setStatus(HttpStatus.OK)
-                                .addResponseHeader("Content-Type", "application/json")
-                                .modifyResponseBody(String.class, String.class,
-                                        (exchange, body) -> Mono.just("{\"status\":\"UP\",\"service\":\"api-gateway\"}"))
-                        )
-                )
+                        .uri("http://localhost:8080"))
 
-                // RUTA PARA DOCUMENTACION API
-                .route("api-docs", r -> r
-                        .path("/api/docs/**")
-                        .uri("http://localhost:8080")
-                        .filters(f -> f
-                                .addResponseHeader("Content-Type", "application/json")
-                                .modifyResponseBody(String.class, String.class,
-                                        (exchange, body) -> Mono.just(getApiDocumentation()))
-                        )
-                )
-
-                // RUTA PARA METRICAS
-                .route("metrics", r -> r
-                        .path("/api/metrics")
-                        .and()
-                        .header("Authorization")
-                        .uri("http://localhost:8080/actuator/metrics")
-                        .filters(f -> f
-                                .addResponseHeader("X-Metrics-Source", "api-gateway")
-                        )
-                )
-
-                // FALLBACK - MANEJO DE ERRORES
-                .route("fallback-auth", r -> r
+                // Ruta para fallback de auth
+                .route("auth-fallback", r -> r
                         .path("/fallback/auth")
-                        .uri("http://localhost:8080")
-                        .filters(f -> f
-                                .setStatus(HttpStatus.SERVICE_UNAVAILABLE)
-                                .addResponseheader("Content-Type","application/json")
-                                .modifyResponseBody(String.class, String.class,
-                                        (exchange, body) -> Mono.just(
-                                                "{\"error\":\"Auth Service Unavailable\",\"message\":\"Please try again later\",\"code\":503}"
-                                        ))
-                        )
-                )
+                        .uri("http://localhost:8080"))
 
-                .route("fallback-users", r -> r
-                        .path("/fallback/users")
-                        .uri("http://localhost:8080")
-                        .filters(f -> f
-                                .setStatus(HttpStatus.SERVICE_UNAVAILABLE)
-                                .addResponseHeader("Content-Type", "application/json")
-                                .modifyResponseBody(String.class, String.class,
-                                        (exchange, body) -> Mono.just(
-                                                "{\"error\":\"User Service Unavailable\",\"message\":\"User operations temporarily unavailable\",\"code\":503}"
-                                        ))
-                        )
-                )
+                // Ruta para auth-service vía Eureka
+                .route("auth-service", r -> r
+                        .path("/api/auth/**")
+                        .uri("lb://auth-service"))
 
-                .route("fallback-tickets", r -> r
-                        .path("/fallback/tickets")
-                        .uri("http://localhost:8080")
-                        .filters(f -> f
-                                .setStatus(HttpStatus.SERVICE_UNAVAILABLE)
-                                .addResponseHeader("Content-Type", "application/json")
-                                .modifyResponseBody(String.class, String.class,
-                                        (exchange, body) -> Mono.just(
-                                                "{\"error\":\"Ticket Service Unavailable\",\"message\":\"Ticket operations temporarily unavailable\",\"code\":503}"
-                                        ))
-                        )
-                )
-
-                .route("fallback-notifications", r -> r
-                        .path("/fallback/notifications")
-                        .uri("http://localhost:8080")
-                        .filters(f -> f
-                                .setStatus(HttpStatus.SERVICE_UNAVAILABLE)
-                                .addResponseHeader("Content-Type", "application/json")
-                                .modifyResponseBody(String.class, String.class,
-                                        (exchange, body) -> Mono.just(
-                                                "{\"error\":\"Notification Service Unavailable\",\"message\":\"Notifications temporarily unavailable\",\"code\":503}"
-                                        ))
-                        )
-                )
                 .build();
-    }
-
-    // Key Resolver (Identificar usuario por token y devolver ID o IP) para aplicar Rate Limiting
-    @Bean
-    public KeyResolver userKeyResolver() {
-        return exchange -> {
-            String authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
-
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                try{
-                    // Extraer userId del token
-                    String token = authHeader.substring(7);
-                    String userId = extractUserIdFromToken(token);
-
-                    if (userId != null) {
-                        return Mono.just(userId); // Rate limiting por usuario
-                    }
-                }catch (Exception e){
-                    System.err.println("Error extracting user ID from token: " + e.getMessage());
-                }
-            }
-                // Fallback, usar IP del cliente para rate limiting
-                String clientIp = getClientIp(exchange);
-                return Mono.just(clientIp);
-        };
     }
 
     // Key Resolver (Identificar IP del cliente)
@@ -168,11 +76,47 @@ public class GatewayConfig {
                 : "unknown";
     }
 
-    private String extractUserIdFromToken(String token) {
-        try{
-            return "default-user";
-        }catch (Exception e){
-            return null;
-        }
+    // Documentacion basica de la API
+    private String getApiDocumentation() {
+        return """
+            {
+                "title": "Ticketing System API Gateway",
+                "version": "1.0.0",
+                "description": "API Gateway para sistema de gestión de tickets",
+                "current_phase": "Authentication Only",
+                "available_endpoints": {
+                    "auth": {
+                        "base": "/api/auth",
+                        "methods": [
+                            "POST /api/auth/login - Iniciar sesión",
+                            "POST /api/auth/register - Registrar usuario",
+                            "POST /api/auth/refresh - Renovar token"
+                        ],
+                        "description": "Endpoints de autenticación que se redirigen al Auth Service en puerto 8081"
+                    }
+                },
+                "system_endpoints": {
+                    "health": "GET /health - Estado del API Gateway",
+                    "docs": "GET /api/docs - Esta documentación"
+                },
+                "rate_limits": {
+                    "auth_endpoints": "10 requests/second por IP",
+                    "burst_capacity": "20 requests máximo en ráfagas"
+                },
+                "security": {
+                    "cors": "Habilitado para http://localhost:4200 (Angular)",
+                    "rate_limiting": "Basado en IP del cliente",
+                    "jwt_validation": "Implementado para autenticacion de microservicios"
+                },
+                "backend_services": {
+                    "auth_service": {
+                        "url": "http://localhost:8081",
+                        "status": "active",
+                        "endpoints": "/auth/*"
+                    }
+                },
+                "next_phase": "Implementar User Service y Ticket Service"
+            }
+            """;
     }
 }
