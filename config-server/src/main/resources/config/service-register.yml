@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: service-register
+
+---
+# Desarrollo
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+server:
+  port: 8761
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+  server:
+    enable-self-preservation: false
+
+---
+# Testing
+spring:
+  config:
+    activate:
+      on-profile: test
+
+server:
+  port: 8762
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+
+---
+# Producción
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+server:
+  port: 8763
+
+eureka:
+  instance:
+    hostname: ${EUREKA_HOST:eureka-server}
+  client:
+    register-with-eureka: false
+    fetch-registry: false
