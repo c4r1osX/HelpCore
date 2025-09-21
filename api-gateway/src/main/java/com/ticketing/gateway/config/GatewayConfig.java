@@ -11,6 +11,7 @@ import reactor.core.publisher.Mono;
 //- Rutas dinámicas
 //- Resolvers para rate limiting
 //- Fallbacks para circuit breaker
+
 @Configuration
 public class GatewayConfig {
 

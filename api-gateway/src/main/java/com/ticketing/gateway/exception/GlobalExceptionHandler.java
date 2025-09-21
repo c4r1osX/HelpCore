@@ -21,6 +21,7 @@ import java.time.Instant;
 // * - Loggear errores para monitoreo
 // * - Evitar exposición de información sensible
 // * - Manejar timeouts y errores de circuit breaker
+
 @Component
 @Order(-1)  // Alta prioridad
 public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
@@ -49,7 +50,7 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
         if (ex instanceof ResponseStatusException rse) {
             return new ErrorInfo(
                     rse.getStatusCode(),
-                    mapStatusToErrorType(rse.getStatusCode()), // Esto funcionará con cualquier tipo
+                    mapStatusToErrorType(rse.getStatusCode()),
                     rse.getReason() != null ? rse.getReason() : "Request failed"
             );
         }
@@ -252,11 +253,11 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
     }
 
     private static class ErrorInfo {
-        final HttpStatus status;
+        final HttpStatusCode status;
         final String type;
         final String message;
 
-        ErrorInfo(HttpStatus status, String type, String message) {
+        ErrorInfo(HttpStatusCode status, String type, String message) {
             this.status = status;
             this.type = type;
             this.message = message;

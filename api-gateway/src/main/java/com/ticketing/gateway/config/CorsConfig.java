@@ -21,6 +21,7 @@ import java.util.Collections;
 
 // * Configuración CORS
 // * (http://localhost:4200) -> (http://localhost:8080)
+
 @Configuration
 public class CorsConfig {
 

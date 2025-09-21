@@ -21,7 +21,7 @@ public class ApiGatewayApplication {
 		System.out.println("=================================");
 		System.out.println("Puerto: 8080");
 		System.out.println("Eureka: http://localhost:8761");
-		System.out.println("Config Server: http://localhost:8888");
+		System.out.println("Config Server: http://localhost:8888 (FALTA IMPLEMENTAR)");
 		System.out.println("CORS habilitado para: http://localhost:4200");
 		System.out.println("=================================");
 	}

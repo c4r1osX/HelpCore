@@ -61,8 +61,8 @@ eureka:
     prefer-ip-address: true
     instance-id: ${spring.application.name}:${spring.profiles.active}:${random.value}
 
-# ===== CONFIG SERVER =====
-spring.config.import: "optional:configserver:http://localhost:8888"
+## ===== CONFIG SERVER =====
+#spring.config.import: "optional:configserver:http://localhost:8888"
 
 # ===== REDIS (Rate Limiting) =====
 spring.redis:
