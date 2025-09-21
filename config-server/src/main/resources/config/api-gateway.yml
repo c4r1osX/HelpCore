@@ -16,23 +16,19 @@ spring:
       routes:
         # ===== AUTH SERVICE =====
         - id: auth-service
-          uri: http://localhost:8081
+          uri: lb://auth-service
           predicates:
             - Path=/api/auth/**
           filters:
-            - name: RewritePath
-              args:
-                regexp: /api/auth/(?<segment>.*)
-                replacement: /auth/${segment}
-            - name: CircuitBreaker
-              args:
-                name: auth-service-cb
-                fallbackUri: forward:/fallback/auth
-            - name: RequestRateLimiter  # Rate limiting
-              args:
-                redis-rate-limiter.replenishRate: 10   # 10 requests por segundo
-                redis-rate-limiter.burstCapacity: 20   # Máximo 20 requests en burst
-                key-resolver: "#{@ipKeyResolver}"      # Usar IP porque no hay JWT en auth
+            - RewritePath=/api/auth/(?<segment>.*), /auth/${segment}
+
+        # ===== TICKET SERVICE =====
+        - id: ticket-service
+          uri: lb://ticket-service
+          predicates:
+            - Path=/api/ticket/**
+          filters:
+            - RewritePath=/api/ticket/(?<segment>.*), /ticket/${segment}
 
       default-filters:
         - name: AddResponseHeader

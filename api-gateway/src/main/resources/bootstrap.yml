@@ -1,12 +1,10 @@
 spring:
   application:
-    name: ticket-service
-
-  config:
-    import: optional:configserver:http://localhost:8888
+    name: api-gateway
 
   cloud:
     config:
+      uri: http://localhost:8888
       username: admin
       password: config123
       fail-fast: true
