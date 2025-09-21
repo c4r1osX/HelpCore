@@ -2,9 +2,6 @@ spring:
   application:
     name: api-gateway
 
-  profiles:
-    active: dev
-
   cloud:
     gateway:
       discovery:
@@ -34,16 +31,6 @@ spring:
                 redis-rate-limiter.burstCapacity: 20   # Máximo 20 requests en burst
                 key-resolver: "#{@ipKeyResolver}"      # Usar IP porque no hay JWT en auth
 
-      default-filters:
-        - name: AddResponseHeader
-          args:
-            name: X-API-Gateway
-            value: Ticketing-System-Gateway
-        - name: AddResponseHeader
-          args:
-            name: X-Response-Time
-            value: "#{T(System).currentTimeMillis()}"
-
 
 server:
   port: 8080
@@ -57,9 +44,6 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
     fetch-registry: true
     register-with-eureka: true
-  instance:
-    prefer-ip-address: true
-    instance-id: ${spring.application.name}:${spring.profiles.active}:${random.value}
 
 ## ===== CONFIG SERVER =====
 #spring.config.import: "optional:configserver:http://localhost:8888"
