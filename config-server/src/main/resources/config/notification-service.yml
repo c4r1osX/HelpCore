@@ -12,64 +12,64 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka/
 
----
-# Perfil de desarrollo
-spring:
-  config:
-    activate:
-      on-profile: dev
-  datasource:
-    url: jdbc:mysql://localhost:3306/DB_HELPCORE?useSSL=false&serverTimezone=UTC
-    username: root
-    password: mysql
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
+# ---
+# # Perfil de desarrollo
+# spring:
+#   config:
+#     activate:
+#       on-profile: dev
+#   datasource:
+#     url: jdbc:mysql://localhost:3306/DB_HELPCORE?useSSL=false&serverTimezone=UTC
+#     username: root
+#     password: mysql
+#     driver-class-name: com.mysql.cj.jdbc.Driver
+#   jpa:
+#     hibernate:
+#       ddl-auto: update
+#     show-sql: true
 
-server:
-  port: 8083
+# server:
+#   port: 8083
 
----
-# Perfil de testing
-spring:
-  config:
-    activate:
-      on-profile: test
-  datasource:
-    url: jdbc:mysql://localhost:3306/DB_HELPCORE_TEST?useSSL=false&serverTimezone=UTC
-    username: root
-    password: mysql
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: false
+# ---
+# # Perfil de testing
+# spring:
+#   config:
+#     activate:
+#       on-profile: test
+#   datasource:
+#     url: jdbc:mysql://localhost:3306/DB_HELPCORE_TEST?useSSL=false&serverTimezone=UTC
+#     username: root
+#     password: mysql
+#     driver-class-name: com.mysql.cj.jdbc.Driver
+#   jpa:
+#     hibernate:
+#       ddl-auto: create-drop
+#     show-sql: false
 
-server:
-  port: 8084
+# server:
+#   port: 8084
 
----
-# Perfil de producción
-spring:
-  config:
-    activate:
-      on-profile: prod
-  datasource:
-    url: jdbc:mysql://prod-server:3306/DB_HELPCORE_PROD?useSSL=true&serverTimezone=UTC
-    username: ${DB_USER:produser}
-    password: ${DB_PASS:prodpass}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    show-sql: false
+# ---
+# # Perfil de producción
+# spring:
+#   config:
+#     activate:
+#       on-profile: prod
+#   datasource:
+#     url: jdbc:mysql://prod-server:3306/DB_HELPCORE_PROD?useSSL=true&serverTimezone=UTC
+#     username: ${DB_USER:produser}
+#     password: ${DB_PASS:prodpass}
+#     driver-class-name: com.mysql.cj.jdbc.Driver
+#   jpa:
+#     hibernate:
+#       ddl-auto: validate
+#     show-sql: false
 
-server:
-  port: 8085
+# server:
+#   port: 8085
 
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_URL:http://eureka-prod:8761/eureka/}
+# eureka:
+#   client:
+#     service-url:
+#       defaultZone: ${EUREKA_URL:http://eureka-prod:8761/eureka/}

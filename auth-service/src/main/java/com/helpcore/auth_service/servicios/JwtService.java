@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 
 import com.helpcore.auth_service.entidades.Usuario;
@@ -16,6 +17,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 @Service
+@RefreshScope
 public class JwtService {
 
     @Value("${app.security.jwt.secret}")
