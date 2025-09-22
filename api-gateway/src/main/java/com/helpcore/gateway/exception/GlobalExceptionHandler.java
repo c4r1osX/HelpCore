@@ -1,4 +1,4 @@
-package com.ticketing.gateway.exception;
+package com.helpcore.gateway.exception;
 
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
 import org.springframework.core.annotation.Order;

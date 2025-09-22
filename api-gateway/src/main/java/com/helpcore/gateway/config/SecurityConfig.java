@@ -1,4 +1,4 @@
-package com.ticketing.gateway.config;
+package com.helpcore.gateway.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,13 +8,12 @@ import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.cors.reactive.CorsWebFilter;
-import com.ticketing.gateway.filter.AuthenticationFilter;
+import com.helpcore.gateway.filter.AuthenticationFilter;
 
-// * - Definir qué endpoints requieren autenticación
-// * - Configurar el filtro de validación JWT
-// * - Integrar CORS con security
-// * - Manejar excepciones de seguridad
 
+// * - Define qué endpoints requieren autenticación
+// * - Configura el filtro de validación JWT
+// * - Integra CORS con security
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
@@ -35,39 +34,38 @@ public class SecurityConfig {
                 .httpBasic(basic -> basic.disable())
                 .formLogin(form -> form.disable())
 
-                .cors(cors -> cors.configurationSource(exchange -> null))
+                // Configuración de CORS
+                .cors(cors -> cors.disable()) // CORS manejado por CorsWebFilter
 
+                // Configuración de autorización de endpoints
                 .authorizeExchange(exchanges -> exchanges
                         // RUTAS PÚBLICAS
                         .pathMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
+                        .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Preflight CORS
 
-                        // Health checks y métricas públicas
+                        // Health checks y documentación
                         .pathMatchers(HttpMethod.GET, "/health").permitAll()
                         .pathMatchers(HttpMethod.GET, "/api/docs/**").permitAll()
-                        .pathMatchers(HttpMethod.GET, "/actuator/health").permitAll()
+                        .pathMatchers(HttpMethod.GET, "/actuator/**").permitAll()
 
-                        // Fallback endpoints
+                        // Endpoints de fallback
                         .pathMatchers("/fallback/**").permitAll()
 
-                        // RUTAS QUE REQUIEREN AUTENTICACIÓN
+                        // RUTAS PROTEGIDAS
                         .pathMatchers("/api/auth/refresh").authenticated()
 
-                        // Métricas y admin endpoints (requieren autenticación)
-                        .pathMatchers("/api/metrics").authenticated()
-                        .pathMatchers("/actuator/**").authenticated()
-
-                        // CUALQUIER OTRA RUTA
-                        .anyExchange().authenticated()  // Por defecto, requiere autenticación
+                        // Cualquier otra ruta requiere autenticación
+                        .anyExchange().authenticated()
                 )
 
                 // FILTROS PERSONALIZADOS
-                .addFilterBefore(corsWebFilter, SecurityWebFiltersOrder.CORS)  // CORS
-                .addFilterAfter(authenticationFilter, SecurityWebFiltersOrder.CORS)  // JWT
+                .addFilterBefore(corsWebFilter, SecurityWebFiltersOrder.CORS)
+                .addFilterAfter(authenticationFilter, SecurityWebFiltersOrder.CORS)
 
                 // EXCEPCIONES
                 .exceptionHandling(exceptions -> exceptions
-                        // Cuando no está autenticado (401)
+                        // 401 - No autenticado
                         .authenticationEntryPoint((exchange, ex) -> {
                             exchange.getResponse().setStatusCode(
                                     org.springframework.http.HttpStatus.UNAUTHORIZED
@@ -77,7 +75,7 @@ public class SecurityConfig {
                             String body = """
                         {
                             "error": "Unauthorized",
-                            "message": "JWT token is missing or invalid",
+                            "message": "Authentication required",
                             "code": 401,
                             "timestamp": "%s"
                         }
@@ -89,7 +87,7 @@ public class SecurityConfig {
                             return exchange.getResponse().writeWith(reactor.core.publisher.Mono.just(buffer));
                         })
 
-                        // Cuando no tiene permisos (403)
+                        // 403 - Sin permisos
                         .accessDeniedHandler((exchange, denied) -> {
                             exchange.getResponse().setStatusCode(
                                     org.springframework.http.HttpStatus.FORBIDDEN
@@ -99,7 +97,7 @@ public class SecurityConfig {
                             String body = """
                         {
                             "error": "Forbidden",
-                            "message": "Insufficient permissions for this resource",
+                            "message": "Insufficient permissions",
                             "code": 403,
                             "timestamp": "%s"
                         }
@@ -110,21 +108,6 @@ public class SecurityConfig {
 
                             return exchange.getResponse().writeWith(reactor.core.publisher.Mono.just(buffer));
                         })
-                )
-
-                .build();
-    }
-
-    // DESABILITAR CONFIGURACION
-    @Bean("developmentSecurityWebFilterChain")
-    public SecurityWebFilterChain developmentSecurityWebFilterChain(ServerHttpSecurity http) {
-        // profile "dev-no-security"
-        // Útil para testing y desarrollo inicial
-        return http
-                .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(exchange -> null))
-                .authorizeExchange(exchanges -> exchanges
-                        .anyExchange().permitAll()  // Permitir todo en desarrollo
                 )
                 .build();
     }

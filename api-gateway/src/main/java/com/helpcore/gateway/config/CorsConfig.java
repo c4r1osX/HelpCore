@@ -1,4 +1,4 @@
-package com.ticketing.gateway.config;
+package com.helpcore.gateway.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,8 +16,6 @@ import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
-import java.util.Collections;
-
 
 // * Configuración CORS
 // * (http://localhost:4200) -> (http://localhost:8080)

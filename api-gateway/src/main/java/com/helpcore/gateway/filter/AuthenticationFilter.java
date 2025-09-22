@@ -1,4 +1,4 @@
-package com.ticketing.gateway.filter;
+package com.helpcore.gateway.filter;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -20,7 +20,6 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 // * - Validar JWT tokens en headers Authorization
 // * - Extraer información del usuario del token
