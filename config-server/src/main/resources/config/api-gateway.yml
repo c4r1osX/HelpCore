@@ -2,9 +2,6 @@ spring:
   application:
     name: api-gateway
 
-  profiles:
-    active: dev
-
   cloud:
     gateway:
       discovery:
@@ -30,16 +27,6 @@ spring:
           filters:
             - RewritePath=/api/ticket/(?<segment>.*), /ticket/${segment}
 
-      default-filters:
-        - name: AddResponseHeader
-          args:
-            name: X-API-Gateway
-            value: Ticketing-System-Gateway
-        - name: AddResponseHeader
-          args:
-            name: X-Response-Time
-            value: "#{T(System).currentTimeMillis()}"
-
 
 server:
   port: 8080
@@ -53,42 +40,10 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
     fetch-registry: true
     register-with-eureka: true
-  instance:
-    prefer-ip-address: true
-    instance-id: ${spring.application.name}:${spring.profiles.active}:${random.value}
 
 ## ===== CONFIG SERVER =====
 #spring.config.import: "optional:configserver:http://localhost:8888"
 
-# ===== REDIS (Rate Limiting) =====
-spring.redis:
-  host: localhost
-  port: 6379
-  timeout: 2000ms
-
-# ===== RESILIENCE4J (Circuit Breaker) =====
-resilience4j:
-  circuitbreaker:
-    instances:
-      auth-service-cb:
-        registerHealthIndicator: true
-        slidingWindowSize: 10                     # Ventana de 10 requests
-        failureRateThreshold: 50                  # 50% de fallos para abrir circuito
-        waitDurationInOpenState: 30s              # Esperar 30s antes de intentar de nuevo
-        permittedNumberOfCallsInHalfOpenState: 3  # 3 llamadas en half-open
-
-# ===== ACTUATOR (Health Checks) =====
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,circuitbreakers,gateway
-  endpoint:
-    health:
-      show-details: always
-  info:
-    env:
-      enabled: true
 
 # ===== JWT CONFIGURATION =====
 jwt:
