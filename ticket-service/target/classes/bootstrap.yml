@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: ticket-service
+
+  config:
+    import: optional:configserver:http://localhost:8888
+
+  cloud:
+    config:
+      username: admin
+      password: config123
+      fail-fast: true
