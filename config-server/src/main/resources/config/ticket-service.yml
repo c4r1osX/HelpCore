@@ -4,10 +4,11 @@ server:
 spring:
   application:
     name: ticket-service
+
   datasource:
-    url: jdbc:mysql://localhost:3306/DB_HELPCORE_OPERATIVA?useSSL=false&serverTimezone=UTC
-    username: root
-    password: mysql
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://mysql:3306/DB_HELPCORE_OPERATIVA?useSSL=false&serverTimezone=UTC}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:mysql}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -22,7 +23,6 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://service-register:8761/eureka/}
     fetch-registry: true
     register-with-eureka: true
-
