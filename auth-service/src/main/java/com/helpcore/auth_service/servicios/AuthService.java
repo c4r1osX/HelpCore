@@ -2,7 +2,6 @@ package com.helpcore.auth_service.servicios;
 
 import java.util.List;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,44 +29,22 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public TokenResponseDTO registrar(UsuarioRegisterDTO dto) {
-        System.out.println("=== AUTH-SERVICE: ENTRANDO AL MÉTODO REGISTRAR ===");
-        System.out.println("Usuario a registrar: " + dto.getNombreUsuario());
+        Usuario usuario = Usuario.builder()
+                .nombreUsuario(dto.getNombreUsuario())
+                .contrasena(passwordEncoder.encode(dto.getContrasena()))
+                .activo(true)
+                .build();
 
-        // Verificar si el usuario ya existe
-        if (usuarioRepository.findByNombreUsuario(dto.getNombreUsuario()).isPresent()) {
-            System.out.println("❌ ERROR: El usuario ya existe");
-            throw new RuntimeException("El usuario ya existe");
-        }
+        Usuario usuarioGuardado = usuarioRepository.save(usuario);
 
-        try {
-            Usuario usuario = Usuario.builder()
-                    .nombreUsuario(dto.getNombreUsuario())
-                    .contrasena(passwordEncoder.encode(dto.getContrasena()))
-                    .activo(true)
-                    .build();
+        var jwtToken = jwtService.generarToken(usuario);
+        var refreshToken = jwtService.generarRefreshToken(usuario);
 
-            System.out.println("Guardando usuario en base de datos...");
-            Usuario usuarioGuardado = usuarioRepository.save(usuario);
-            System.out.println("✅ Usuario guardado con ID: " + usuarioGuardado.getId());
-
-            var jwtToken = jwtService.generarToken(usuario);
-            var refreshToken = jwtService.generarRefreshToken(usuario);
-
-            guardarTokenUsuario(usuarioGuardado, jwtToken);
-
-            System.out.println("=== REGISTRO COMPLETADO EXITOSAMENTE ===");
-            return new TokenResponseDTO(jwtToken, refreshToken);
-
-        } catch (Exception e) {
-            System.out.println("❌ ERROR EN PROCESO DE REGISTRO: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
-        }
+        guardarTokenUsuario(usuarioGuardado, jwtToken);
+        return new TokenResponseDTO(jwtToken, refreshToken);
     }
 
     public TokenResponseDTO login(UsuarioLoginDTO request) {
-        System.out.println("=== ENTRANDO AL MÉTODO LOGIN ===");
-        System.out.println("Usuario intentando login: " + request.getNombreUsuario());
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
