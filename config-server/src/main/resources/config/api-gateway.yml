@@ -1,50 +1,34 @@
 spring:
-  application:
-    name: api-gateway
 
-  cloud:
-    gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
-
-      # Configuración de rutas estáticas y dinámicas
-      routes:
-        # ===== AUTH SERVICE =====
-        - id: auth-service
-          uri: lb://auth-service
-          predicates:
-            - Path=/api/auth/**
-          filters:
-            - RewritePath=/api/auth/(?<segment>.*), /auth/${segment}
-
-        # ===== TICKET SERVICE =====
-        - id: ticket-service
-          uri: lb://ticket-service
-          predicates:
-            - Path=/api/ticket/**
-          filters:
-            - RewritePath=/api/ticket/(?<segment>.*), /ticket/${segment}
-
-
-server:
-  port: 8080
-  error:
-    include-message: always
-
-# ===== EUREKA CLIENT =====
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-    fetch-registry: true
-    register-with-eureka: true
-
-## ===== CONFIG SERVER =====
-#spring.config.import: "optional:configserver:http://localhost:8888"
-
-
+#spring.redis:
+#  host: localhost
+#  port: 6379
+#  timeout: 2000ms
+#
+## ===== RESILIENCE4J (Circuit Breaker) =====
+#resilience4j:
+#  circuitbreaker:
+#    instances:
+#      auth-service-cb:
+#        registerHealthIndicator: true
+#        slidingWindowSize: 10                     # Ventana de 10 requests
+#        failureRateThreshold: 50                  # 50% de fallos para abrir circuito
+#        waitDurationInOpenState: 30s              # Esperar 30s antes de intentar de nuevo
+#        permittedNumberOfCallsInHalfOpenState: 3  # 3 llamadas en half-open
+#
+## ===== ACTUATOR (Health Checks) =====
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: health,info,metrics,circuitbreakers,gateway
+#  endpoint:
+#    health:
+#      show-details: always
+#  info:
+#    env:
+#      enabled: true
+#
 # ===== JWT CONFIGURATION =====
 jwt:
   secret: QmFzZTY0RW5jb2RlZEtleVNlZ3VyYUV4YW1wbGVEYXRhIQ==
