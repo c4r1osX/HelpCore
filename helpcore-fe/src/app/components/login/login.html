@@ -1,0 +1,39 @@
+<div class="min-vh-100 d-flex align-items-center justify-content-center"
+     style="background-image: url('/assets/images/login-background.jpg'); background-size: cover; background-position: center;">
+  <div class="card p-4 shadow-sm" style="max-width: 400px; width: 100%;">
+    <h3 class="text-center mb-4">Inicio de sesión</h3>
+    <form (submit)="login()" [formGroup]="loginForm">
+      <!-- Usuario -->
+      <div class="mb-3">
+        <label for="usuario" class="form-label">Usuario</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+          <input type="text" id="usuario" class="form-control"
+            placeholder="Ingresa tu nombre de usuario"
+            formControlName="nombreUsuario" required>
+        </div>
+      </div>
+
+      <!-- Contraseña -->
+      <div class="mb-3">
+        <label for="contrasena" class="form-label">Contraseña</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+          <input type="password" id="contrasena" class="form-control"
+            placeholder="Ingresa tu contraseña"
+            formControlName="contrasena" required>
+        </div>
+      </div>
+
+      <!-- Mensaje de error -->
+      <div *ngIf="mensaje" class="error-message mb-2">
+        {{ mensaje }}
+      </div>
+
+      <!-- Botón -->
+      <div class="d-grid">
+        <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+      </div>
+    </form>
+  </div>
+</div>
