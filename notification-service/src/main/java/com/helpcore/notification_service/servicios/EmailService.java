@@ -12,7 +12,7 @@ public class EmailService {
 
     public void sendTicketCreatedEmail(String to, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to); // destinatario
+        message.setTo(to);
         message.setSubject(subject);
         message.setText(body);
 
