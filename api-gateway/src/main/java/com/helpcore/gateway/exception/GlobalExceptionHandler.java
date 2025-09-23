@@ -21,7 +21,6 @@ import java.time.Instant;
 // * - Loggear errores para monitoreo
 // * - Evitar exposición de información sensible
 // * - Manejar timeouts y errores de circuit breaker
-
 @Component
 @Order(-1)  // Alta prioridad
 public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
@@ -192,7 +191,7 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
 
         jsonBuilder.append(",\n  \"help\": {\n");
         jsonBuilder.append("    \"documentation\": \"/api/docs\",\n");
-        jsonBuilder.append("    \"support\": \"support@ticketing-system.com\",\n");
+        jsonBuilder.append("    \"support\": \"support@helpcore-system.com\",\n");
         jsonBuilder.append("    \"status\": \"/health\"\n");
         jsonBuilder.append("  }\n");
 

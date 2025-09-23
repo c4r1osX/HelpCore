@@ -30,22 +30,44 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public TokenResponseDTO registrar(UsuarioRegisterDTO dto) {
-        Usuario usuario = Usuario.builder()
-                .nombreUsuario(dto.getNombreUsuario())
-                .contrasena(passwordEncoder.encode(dto.getContrasena()))
-                .activo(true)
-                .build();
+        System.out.println("=== AUTH-SERVICE: ENTRANDO AL MÉTODO REGISTRAR ===");
+        System.out.println("Usuario a registrar: " + dto.getNombreUsuario());
 
-        Usuario usuarioGuardado = usuarioRepository.save(usuario);
+        // Verificar si el usuario ya existe
+        if (usuarioRepository.findByNombreUsuario(dto.getNombreUsuario()).isPresent()) {
+            System.out.println("❌ ERROR: El usuario ya existe");
+            throw new RuntimeException("El usuario ya existe");
+        }
 
-        var jwtToken = jwtService.generarToken(usuario);
-        var refreshToken = jwtService.generarRefreshToken(usuario);
+        try {
+            Usuario usuario = Usuario.builder()
+                    .nombreUsuario(dto.getNombreUsuario())
+                    .contrasena(passwordEncoder.encode(dto.getContrasena()))
+                    .activo(true)
+                    .build();
 
-        guardarTokenUsuario(usuarioGuardado, jwtToken);
-        return new TokenResponseDTO(jwtToken, refreshToken);
+            System.out.println("Guardando usuario en base de datos...");
+            Usuario usuarioGuardado = usuarioRepository.save(usuario);
+            System.out.println("✅ Usuario guardado con ID: " + usuarioGuardado.getId());
+
+            var jwtToken = jwtService.generarToken(usuario);
+            var refreshToken = jwtService.generarRefreshToken(usuario);
+
+            guardarTokenUsuario(usuarioGuardado, jwtToken);
+
+            System.out.println("=== REGISTRO COMPLETADO EXITOSAMENTE ===");
+            return new TokenResponseDTO(jwtToken, refreshToken);
+
+        } catch (Exception e) {
+            System.out.println("❌ ERROR EN PROCESO DE REGISTRO: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     public TokenResponseDTO login(UsuarioLoginDTO request) {
+        System.out.println("=== ENTRANDO AL MÉTODO LOGIN ===");
+        System.out.println("Usuario intentando login: " + request.getNombreUsuario());
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(

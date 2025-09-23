@@ -19,7 +19,6 @@ import java.util.Arrays;
 
 // * Configuración CORS
 // * (http://localhost:4200) -> (http://localhost:8080)
-
 @Configuration
 public class CorsConfig {
 
@@ -30,7 +29,7 @@ public class CorsConfig {
         corsConfig.setAllowedOriginPatterns(Arrays.asList(
                 "http://localhost:4200",
                 "http://127.0.0.1:4200",
-                "https://ticketing-app.com"
+                "https://helpcore-app.com"
         ));
 
         // ===== MÉTODOS HTTP PERMITIDOS =====
@@ -112,6 +111,6 @@ public class CorsConfig {
     private boolean isAllowedOrigin(String origin) {
         return origin.equals("http://localhost:4200") ||
                origin.equals("http://127.0.0.1:4200") ||
-               origin.equals("https://ticketing-app.com");
+               origin.equals("https://helpcore-app.com");
     }
 }

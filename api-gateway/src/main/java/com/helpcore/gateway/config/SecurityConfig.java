@@ -10,10 +10,6 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import com.helpcore.gateway.filter.AuthenticationFilter;
 
-
-// * - Define qué endpoints requieren autenticación
-// * - Configura el filtro de validación JWT
-// * - Integra CORS con security
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
@@ -33,20 +29,16 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .httpBasic(basic -> basic.disable())
                 .formLogin(form -> form.disable())
+                .cors(cors -> cors.disable())
 
-                // Configuración de CORS
-                .cors(cors -> cors.disable()) // CORS manejado por CorsWebFilter
-
-                // Configuración de autorización de endpoints
                 .authorizeExchange(exchanges -> exchanges
-                        // RUTAS PÚBLICAS
+                        // RUTAS PÚBLICAS - AHORA CON /api/auth/**
                         .pathMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
-                        .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Preflight CORS
+                        .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // Health checks y documentación
                         .pathMatchers(HttpMethod.GET, "/health").permitAll()
-                        .pathMatchers(HttpMethod.GET, "/api/docs/**").permitAll()
                         .pathMatchers(HttpMethod.GET, "/actuator/**").permitAll()
 
                         // Endpoints de fallback
@@ -60,12 +52,11 @@ public class SecurityConfig {
                 )
 
                 // FILTROS PERSONALIZADOS
-                .addFilterBefore(corsWebFilter, SecurityWebFiltersOrder.CORS)
-                .addFilterAfter(authenticationFilter, SecurityWebFiltersOrder.CORS)
+                .addFilterBefore(authenticationFilter, SecurityWebFiltersOrder.AUTHORIZATION)
+                .addFilterAfter(corsWebFilter, SecurityWebFiltersOrder.CORS)
 
                 // EXCEPCIONES
                 .exceptionHandling(exceptions -> exceptions
-                        // 401 - No autenticado
                         .authenticationEntryPoint((exchange, ex) -> {
                             exchange.getResponse().setStatusCode(
                                     org.springframework.http.HttpStatus.UNAUTHORIZED
@@ -87,7 +78,6 @@ public class SecurityConfig {
                             return exchange.getResponse().writeWith(reactor.core.publisher.Mono.just(buffer));
                         })
 
-                        // 403 - Sin permisos
                         .accessDeniedHandler((exchange, denied) -> {
                             exchange.getResponse().setStatusCode(
                                     org.springframework.http.HttpStatus.FORBIDDEN

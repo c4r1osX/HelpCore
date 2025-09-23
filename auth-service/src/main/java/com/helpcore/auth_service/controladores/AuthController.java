@@ -24,13 +24,13 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
 
     private final AuthService authService;
-    
+
    @PostMapping("/register")
    public ResponseEntity<TokenResponseDTO> register(@RequestBody final UsuarioRegisterDTO request) {
        final TokenResponseDTO token = authService.registrar(request);
        return ResponseEntity.ok(token);
    }
-   
+
     @PostMapping("/login")
     public ResponseEntity<TokenResponseDTO> login(@RequestBody final UsuarioLoginDTO request) {
        final TokenResponseDTO token = authService.login(request);
