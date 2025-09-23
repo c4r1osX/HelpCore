@@ -37,6 +37,11 @@ public class GatewayConfig {
                 // Ruta para auth-service vía Eureka
                 .route("auth-service", r -> r
                         .path("/api/auth/**")
+                        .filters(f -> f
+                                .rewritePath("/api/auth/(?<segment>.*)", "/auth/${segment}")
+                                .addRequestHeader("X-Gateway-Debug", "true")
+                                .addResponseHeader("X-Gateway-Route", "auth-service")
+                        )
                         .uri("lb://auth-service"))
 
                 .build();
