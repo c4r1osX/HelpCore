@@ -7,11 +7,15 @@ import { HttpClientModule } from '@angular/common/http';
 import { Login } from './components/login/login';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
+import { Inicio } from './components/inicio/inicio';
+import { NavBar } from './components/common/nav-bar/nav-bar';
 
 @NgModule({
   declarations: [
     App,
-    Login
+    Login,
+    Inicio,
+    NavBar
   ],
   imports: [
     BrowserModule,

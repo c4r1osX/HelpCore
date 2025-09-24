@@ -14,18 +14,14 @@ import com.ticketing.gateway.filter.AuthenticationFilter;
 // * - Configurar el filtro de validación JWT
 // * - Integrar CORS con security
 // * - Manejar excepciones de seguridad
-
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
     private final AuthenticationFilter authenticationFilter;
-    private final CorsWebFilter corsWebFilter;
 
-    public SecurityConfig(AuthenticationFilter authenticationFilter,
-                          CorsWebFilter corsWebFilter) {
+    public SecurityConfig(AuthenticationFilter authenticationFilter) {
         this.authenticationFilter = authenticationFilter;
-        this.corsWebFilter = corsWebFilter;
     }
 
     @Bean
@@ -35,12 +31,13 @@ public class SecurityConfig {
                 .httpBasic(basic -> basic.disable())
                 .formLogin(form -> form.disable())
 
-                .cors(cors -> cors.configurationSource(exchange -> null))
+                // NO CONFIGURAR CORS AQUÍ - Se maneja en Gateway
 
                 .authorizeExchange(exchanges -> exchanges
                         // RUTAS PÚBLICAS
                         .pathMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
+                        .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll() // PERMITIR OPTIONS
 
                         // Health checks y métricas públicas
                         .pathMatchers(HttpMethod.GET, "/health").permitAll()
@@ -52,22 +49,18 @@ public class SecurityConfig {
 
                         // RUTAS QUE REQUIEREN AUTENTICACIÓN
                         .pathMatchers("/api/auth/refresh").authenticated()
-
-                        // Métricas y admin endpoints (requieren autenticación)
                         .pathMatchers("/api/metrics").authenticated()
                         .pathMatchers("/actuator/**").authenticated()
 
                         // CUALQUIER OTRA RUTA
-                        .anyExchange().authenticated()  // Por defecto, requiere autenticación
+                        .anyExchange().authenticated()
                 )
 
-                // FILTROS PERSONALIZADOS
-                .addFilterBefore(authenticationFilter, SecurityWebFiltersOrder.AUTHORIZATION)  // CORS
-                .addFilterAfter(corsWebFilter, SecurityWebFiltersOrder.CORS)  // JWT
+                // SOLO EL FILTRO DE AUTENTICACIÓN
+                .addFilterAfter(authenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
 
                 // EXCEPCIONES
                 .exceptionHandling(exceptions -> exceptions
-                        // Cuando no está autenticado (401)
                         .authenticationEntryPoint((exchange, ex) -> {
                             exchange.getResponse().setStatusCode(
                                     org.springframework.http.HttpStatus.UNAUTHORIZED
@@ -89,7 +82,6 @@ public class SecurityConfig {
                             return exchange.getResponse().writeWith(reactor.core.publisher.Mono.just(buffer));
                         })
 
-                        // Cuando no tiene permisos (403)
                         .accessDeniedHandler((exchange, denied) -> {
                             exchange.getResponse().setStatusCode(
                                     org.springframework.http.HttpStatus.FORBIDDEN
@@ -112,20 +104,6 @@ public class SecurityConfig {
                         })
                 )
 
-                .build();
-    }
-
-    // DESABILITAR CONFIGURACION
-    @Bean("developmentSecurityWebFilterChain")
-    public SecurityWebFilterChain developmentSecurityWebFilterChain(ServerHttpSecurity http) {
-        // profile "dev-no-security"
-        // Útil para testing y desarrollo inicial
-        return http
-                .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(exchange -> null))
-                .authorizeExchange(exchanges -> exchanges
-                        .anyExchange().permitAll()  // Permitir todo en desarrollo
-                )
                 .build();
     }
 }

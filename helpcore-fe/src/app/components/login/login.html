@@ -1,27 +1,46 @@
-<div class="min-vh-100 d-flex align-items-center justify-content-center"
-     style="background-image: url('/assets/images/login-background.jpg'); background-size: cover; background-position: center;">
-  <div class="card p-4 shadow-sm" style="max-width: 400px; width: 100%;">
-    <h3 class="text-center mb-4">Inicio de sesión</h3>
-    <form (submit)="login()" [formGroup]="loginForm">
+<div class="login-container">
+  <div class="login-card">
+    <!-- Header -->
+    <div class="login-header">
+      <h1 class="login-title">Iniciar Sesión</h1>
+      <p class="login-subtitle">Accede a tu cuenta de HelpCore</p>
+    </div>
+
+    <!-- Formulario Angular -->
+    <form class="login-form" id="loginForm" (submit)="login()" [formGroup]="loginForm">
       <!-- Usuario -->
-      <div class="mb-3">
-        <label for="usuario" class="form-label">Usuario</label>
+      <div class="form-group mb-3">
         <div class="input-group">
-          <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
-          <input type="text" id="usuario" class="form-control"
-            placeholder="Ingresa tu nombre de usuario"
-            formControlName="nombreUsuario" required>
+          <div class="input-icon">
+            <i class="fas fa-user"></i>
+          </div>
+          <input 
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Usuario o correo electrónico"
+            class="form-control"
+            formControlName="nombreUsuario"
+            required
+          >
         </div>
       </div>
 
       <!-- Contraseña -->
-      <div class="mb-3">
-        <label for="contrasena" class="form-label">Contraseña</label>
+      <div class="form-group mb-3">
         <div class="input-group">
-          <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-          <input type="password" id="contrasena" class="form-control"
-            placeholder="Ingresa tu contraseña"
-            formControlName="contrasena" required>
+          <div class="input-icon">
+            <i class="fas fa-lock"></i>
+          </div>
+          <input 
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Contraseña"
+            class="form-control"
+            formControlName="contrasena"
+            required
+          >
         </div>
       </div>
 
@@ -31,9 +50,24 @@
       </div>
 
       <!-- Botón -->
-      <div class="d-grid">
-        <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+      <button type="submit" class="btn-primary w-100">
+        <i class="fas fa-sign-in-alt"></i>
+        Iniciar Sesión
+      </button>
+
+      <!-- Footer form -->
+      <div class="form-footer">
+        <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
       </div>
     </form>
+
+    <!-- Footer card -->
+    <div class="login-footer">
+      <p class="brand-text">
+        <i class="fas fa-ticket-alt"></i>
+        HelpCore
+      </p>
+      <p class="copyright">Sistema de gestión de tickets</p>
+    </div>
   </div>
 </div>

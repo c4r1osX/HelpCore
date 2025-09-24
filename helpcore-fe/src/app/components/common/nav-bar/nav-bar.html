@@ -1,0 +1,75 @@
+<header class="support-header">
+  <div class="container">
+    <div class="header-content d-flex justify-content-between align-items-center">
+
+      <!-- Logo -->
+      <div class="logo-section d-flex align-items-center">
+        <div class="logo-icon">
+          <i class="bi bi-life-preserver"></i>
+        </div>
+        <div class="logo-text ms-2">
+          <h1>HelpCore</h1>
+          <p>Centro de Soporte</p>
+        </div>
+      </div>
+
+      <!-- Navbar -->
+      <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container-fluid">
+
+          <!-- Icono hamburguesa SIEMPRE derecha -->
+          <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarHelpCore" aria-controls="navbarHelpCore" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+
+          <!-- Links -->
+          <div class="collapse navbar-collapse" id="navbarHelpCore">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" href="index.html"><i></i> Inicio</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="faq.html"><i></i> FAQ</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="contacto.html"><i></i> Contacto</a>
+              </li>
+
+              <!-- Login/Cerrar Sesión SOLO en móviles -->
+              <li class="nav-item d-lg-none">
+                <div id="user-info-mobile" class="user-info hidden">
+                  <i class="bi bi-person-circle"></i>
+                  <span>Usuario</span>
+                  <button class="btn btn-outline btn-sm w-100 mt-2" onclick="logout()">
+                    <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                  </button>
+                </div>
+                <button id="login-btn-mobile" class="btn btn-primary w-100 mt-2" onclick="login()">
+                  <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Login/Cerrar Sesión SOLO en desktop -->
+      <div class="user-actions d-none d-lg-flex align-items-center ms-3">
+        <div id="user-info" class="user-info hidden">
+          <i class="bi bi-person-circle"></i>
+          <span>Usuario</span>
+          <button class="btn btn-outline btn-sm ms-2" onclick="logout()">
+            <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+          </button>
+        </div>
+        <button id="login-btn" class="btn btn-sm ms-2" onclick="login()">
+          <i class="bi bi-box-arrow-in-right"></i>
+          <span>Iniciar Sesión</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</header>

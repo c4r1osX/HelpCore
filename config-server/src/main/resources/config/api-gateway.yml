@@ -1,34 +1,46 @@
 spring:
+  application:
+    name: ticketing-gateway
 
-#spring.redis:
-#  host: localhost
-#  port: 6379
-#  timeout: 2000ms
-#
-## ===== RESILIENCE4J (Circuit Breaker) =====
-#resilience4j:
-#  circuitbreaker:
-#    instances:
-#      auth-service-cb:
-#        registerHealthIndicator: true
-#        slidingWindowSize: 10                     # Ventana de 10 requests
-#        failureRateThreshold: 50                  # 50% de fallos para abrir circuito
-#        waitDurationInOpenState: 30s              # Esperar 30s antes de intentar de nuevo
-#        permittedNumberOfCallsInHalfOpenState: 3  # 3 llamadas en half-open
-#
-## ===== ACTUATOR (Health Checks) =====
-#management:
-#  endpoints:
-#    web:
-#      exposure:
-#        include: health,info,metrics,circuitbreakers,gateway
-#  endpoint:
-#    health:
-#      show-details: always
-#  info:
-#    env:
-#      enabled: true
-#
+  cloud:
+    gateway:
+      # CONFIGURACIÓN GLOBAL DE CORS
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns:
+              - "http://localhost:4200"
+              - "http://127.0.0.1:4200"
+              - "https://helpcore.com"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+            maxAge: 3600
+
+      # RUTAS DEL GATEWAY
+      routes:
+        # AUTH SERVICE
+        - id: auth-service
+          uri: http://localhost:8081  # Cambia por el puerto de tu auth service
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=0
+          metadata:
+            cors:
+              allowedOriginPatterns: "*"
+              allowedMethods: "*"
+              allowedHeaders: "*"
+              allowCredentials: true
+
+
 # ===== JWT CONFIGURATION =====
 jwt:
   secret: QmFzZTY0RW5jb2RlZEtleVNlZ3VyYUV4YW1wbGVEYXRhIQ==
@@ -38,8 +50,39 @@ jwt:
 logging:
   level:
     com.ticketing.gateway: DEBUG
-    org.springframework.cloud.gateway: INFO
+    org.springframework.cloud.gateway: DEBUG
     org.springframework.security: INFO
-    io.github.resilience4j: INFO
+    org.springframework.web.cors: DEBUG
+    reactor.netty: INFO
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# ===== SERVER CONFIGURATION =====
+server:
+  port: 8080
+
+# ===== MANAGEMENT (ACTUATOR) =====
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      show-details: always
+
+# CONFIGURACIONES COMENTADAS PARA DESPUÉS
+#spring.redis:
+#  host: localhost
+#  port: 6379
+#  timeout: 2000ms
+#
+#resilience4j:
+#  circuitbreaker:
+#    instances:
+#      auth-service-cb:
+#        registerHealthIndicator: true
+#        slidingWindowSize: 10
+#        failureRateThreshold: 50
+#        waitDurationInOpenState: 30s
+#        permittedNumberOfCallsInHalfOpenState: 3

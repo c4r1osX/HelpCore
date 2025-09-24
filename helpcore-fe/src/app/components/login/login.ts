@@ -34,6 +34,7 @@ export class Login {
             return;
           } else {
             this.mensaje = "Ha ocurrido un error inesperado.";
+            console.log(error)
             return;
           }
         }
