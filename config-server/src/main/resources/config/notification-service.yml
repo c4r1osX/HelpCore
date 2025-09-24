@@ -1,75 +1,44 @@
 spring:
   application:
     name: notification-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/DB_HELPCORE_OPERATIVA?useSSL=false&serverTimezone=UTC
+    username: root
+    password: mysql
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: joaquin.asr.16@gmail.com
+    password: qbmv jtvr qtym giea
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  cloud:
+    config:
+      enabled: false
+      import-check:
+        enabled: false
+
+server:
+  port: 8083
+
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
-
-# ---
-# # Perfil de desarrollo
-# spring:
-#   config:
-#     activate:
-#       on-profile: dev
-#   datasource:
-#     url: jdbc:mysql://localhost:3306/DB_HELPCORE?useSSL=false&serverTimezone=UTC
-#     username: root
-#     password: mysql
-#     driver-class-name: com.mysql.cj.jdbc.Driver
-#   jpa:
-#     hibernate:
-#       ddl-auto: update
-#     show-sql: true
-
-# server:
-#   port: 8083
-
-# ---
-# # Perfil de testing
-# spring:
-#   config:
-#     activate:
-#       on-profile: test
-#   datasource:
-#     url: jdbc:mysql://localhost:3306/DB_HELPCORE_TEST?useSSL=false&serverTimezone=UTC
-#     username: root
-#     password: mysql
-#     driver-class-name: com.mysql.cj.jdbc.Driver
-#   jpa:
-#     hibernate:
-#       ddl-auto: create-drop
-#     show-sql: false
-
-# server:
-#   port: 8084
-
-# ---
-# # Perfil de producción
-# spring:
-#   config:
-#     activate:
-#       on-profile: prod
-#   datasource:
-#     url: jdbc:mysql://prod-server:3306/DB_HELPCORE_PROD?useSSL=true&serverTimezone=UTC
-#     username: ${DB_USER:produser}
-#     password: ${DB_PASS:prodpass}
-#     driver-class-name: com.mysql.cj.jdbc.Driver
-#   jpa:
-#     hibernate:
-#       ddl-auto: validate
-#     show-sql: false
-
-# server:
-#   port: 8085
-
-# eureka:
-#   client:
-#     service-url:
-#       defaultZone: ${EUREKA_URL:http://eureka-prod:8761/eureka/}
