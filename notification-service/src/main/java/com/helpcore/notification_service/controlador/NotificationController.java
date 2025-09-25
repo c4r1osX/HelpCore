@@ -18,14 +18,7 @@ public class NotificationController {
     @PostMapping("/ticket-creado")
     public ResponseEntity<String> handleTicketCreated(@RequestBody TicketCreatedDto ticket) {
         String subject = "Nuevo ticket creado: " + ticket.getTitulo();
-        String body = "Se ha creado un nuevo ticket.\n\n" +
-                "ID: " + ticket.getTicketId() + "\n" +
-                "Título: " + ticket.getTitulo() + "\n" +
-                "Descripción: " + ticket.getDescripcion() + "\n" +
-                "Creado por: " + ticket.getCreadoPor();
-
-        emailService.sendTicketCreatedEmail("joaquin.asr.16@gmail.com", subject, body);
-
+        emailService.sendTicketCreatedEmail("joaquin.asr.16@gmail.com", subject, ticket);
         return ResponseEntity.ok("Notificación enviada al equipo de soporte.");
     }
 }
