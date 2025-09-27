@@ -1,4 +1,284 @@
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  height: 100vh;
+  background: #f5f6fa; /* opcional */
+  display: block; /* importante: no uses flex aquí */
+}
+
+.login-container {
+  min-height: 100vh; /* que ocupe todo el alto */
+  display: flex;
+  justify-content: center; /* horizontal */
+  align-items: center;     /* vertical */
+}
+
+.login-card {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.08);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 400px;
+  transition: all 0.3s ease;
+}
+
+
+.login-card:hover {
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.15), 0 12px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Login Header */
+.login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.login-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.login-subtitle {
+  color: #666666;
+  font-size: 0.95rem;
+  font-weight: 400;
+}
+
+/* Form Styles */
+.login-form {
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #f0f0f0;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.input-group:focus-within {
+  border-color: #000000;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+.input-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  color: #000000;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.input-group input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 0.75rem 1rem 0.75rem 0;
+  font-size: 1rem;
+  color: #000000;
+  outline: none;
+  font-weight: 400;
+}
+
+.input-group input::placeholder {
+  color: #999999;
+  font-weight: 400;
+}
+
+/* Primary Button */
+.btn-primary {
+  width: 100%;
+  background: #000000;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.btn-primary:hover {
+  background: #333333;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Form Footer */
+.form-footer {
+  text-align: center;
+}
+
+.forgot-password {
+  color: #666666;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.forgot-password:hover {
+  color: #000000;
+  text-decoration: underline;
+}
+
+/* Login Footer */
+.login-footer {
+  text-align: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.brand-text {
+  color: #000000;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.brand-text i {
+  font-size: 1.2rem;
+}
+
+.copyright {
+  color: #999999;
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  body {
+    padding: 0.5rem;
+  }
+
+  .login-card {
+    padding: 2rem 1.5rem;
+    border-radius: 12px;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .login-title {
+    font-size: 1.75rem;
+  }
+
+  .input-group {
+    border-radius: 10px;
+  }
+
+  .btn-primary {
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .login-card {
+    padding: 1.5rem 1rem;
+  }
+
+  .login-title {
+    font-size: 1.5rem;
+  }
+
+  .input-icon {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* Focus and Accessibility */
+.btn-primary:focus,
+.input-group input:focus,
+.forgot-password:focus {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
+}
+
+/* Loading State */
+.btn-primary.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.btn-primary.loading::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 0.5rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error States */
+.input-group.error {
+  border-color: #dc2626;
+  background: #fef2f2;
+}
+
+.input-group.error .input-icon {
+  color: #dc2626;
+}
+
 .error-message {
-  color: red;
-  margin-bottom: 16px;
+  color: #dc2626;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  display: none;
+}
+
+.error-message.show {
+  display: block;
 }

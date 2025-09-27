@@ -1,0 +1,75 @@
+/* Header principal */
+.support-header {
+    background: #ffffff;
+    color: rgb(0, 0, 0);
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Logo */
+.logo-section {
+    display: flex;
+    align-items: center;
+}
+
+.logo-icon {
+    font-size: 2rem;
+    color: rgb(0, 0, 0);
+}
+
+.logo-text h1 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+    color: rgba(0, 0, 0, 0.829);
+}
+
+.logo-text p {
+    font-size: 0.9rem;
+    margin: 0;
+    color: #ababab8b;
+}
+
+/* Navbar */
+.navbar-nav .nav-link {
+    color: rgb(0, 0, 0);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #ccc;
+}
+
+.navbar-nav .nav-link.active {
+    font-weight: bold;
+}
+
+/* User info / login */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: white;
+}
+
+.user-info.hidden {
+    display: none;
+}
+
+/* Botones login/logout */
+#login-btn, 
+#login-btn-mobile {
+    border: 1px solid transparent;
+    font-weight: 500;
+}
+
+#login-btn:hover,
+#login-btn-mobile:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+}

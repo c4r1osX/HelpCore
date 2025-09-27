@@ -1,0 +1,197 @@
+
+
+
+
+<hr>
+
+<main>
+    <section class="welcome-section">
+        <div class="container">
+            <div class="welcome-content">
+                <div class="welcome-header">
+                    <h1>Bienvenido a HelpCore</h1>
+                    <p>Centro de Soporte Técnico</p>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-content">
+                        <div class="info-text">
+                            <p>
+                                <i class="bi bi-info-circle"></i>
+                                Con el fin de optimizar nuestro servicio de soporte y ofrecerte una mejor experiencia,
+                                implementamos
+                                el sistema de tickets HelpCore.
+                            </p>
+                            <p>
+                                Cada solicitud que realices obtendrá un número de ticket único, el cual podrás utilizar
+                                para rastrear
+                                el progreso de tu atención y las respuestas en línea.
+                            </p>
+                            <p>
+                                Es fundamental que brindes un correo electrónico válido (ya sea personal o
+                                institucional) para enviar
+                                un ticket. Además, tendrás acceso al historial de todas tus consultas.
+                            </p>
+                            <p class="important-text">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                Importante: Antes de generar un ticket, revisa si lo que necesitas está en la plataforma
+                                de Preguntas
+                                y Respuestas. <a href="#" class="link">Ingresa aquí</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="ticket-actions">
+        <div class="container">
+            <div class="actions-grid">
+                <div class="action-card">
+                    <div class="card-content">
+                        <div class="card-icon circle-black">
+                            <i class="bi bi-plus-circle"></i>
+                        </div>
+                        <h3>Abrir un nuevo Ticket</h3>
+                        <p>Crea una nueva solicitud de soporte técnico</p>
+
+                        <div class="action-buttons">
+                            <button class="btn text-white bg-black" onclick="createTicket('logged')">
+                                <i class="bi bi-person-check"></i> Crear con Cuenta
+                            </button>
+                            <button class="btn" onclick="createTicket('guest')">
+                                <i class="bi bi-person"></i> Continuar como Invitado
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-card">
+                    <div class="card-content">
+                        <div class="card-icon circle-white">
+                            <i class="bi bi-search"></i>
+                        </div>
+                        <h3>Ver Estado de un Ticket</h3>
+                        <p>Consulta el progreso de tu solicitud existente</p>
+
+                        <div class="action-buttons">
+                            <button class="btn">
+                                <i class="bi bi-search"></i> Consultar Estado
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="user-feedback" class="feedback-card hidden">
+                <div class="feedback-content">
+                    <p id="feedback-text"></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features-section">
+        <div class="container">
+            <div class="features-header">
+                <h2>¿Por qué elegir nuestro soporte?</h2>
+                <p>Ofrecemos la mejor experiencia de soporte técnico</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <h3>Seguimiento 24/7</h3>
+                    <p>Rastrea el estado de tu ticket en tiempo real, las 24 horas del día.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-shield-lock"></i>
+                    </div>
+                    <h3>Soporte Seguro</h3>
+                    <p>Tus datos y consultas están protegidos con los más altos estándares de seguridad.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-lightning-charge"></i>
+                    </div>
+                    <h3>Respuesta Rápida</h3>
+                    <p>Nuestro equipo se compromete a responder en el menor tiempo posible.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <h3>Equipo Experto</h3>
+                    <p>Profesionales especializados listos para resolver tus consultas técnicas.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="support-footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-card">
+                <h3>Contacto Directo</h3>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="bi bi-envelope"></i>
+                        <span>soporte@HelpCore.com</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="bi bi-telephone"></i>
+                        <span>+1 (555) 123-4567</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="bi bi-geo-alt"></i>
+                        <span>Lima, Perú</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-card">
+                <h3>Enlaces Rápidos</h3>
+                <div class="quick-links">
+                    <a href="#" class="quick-link"><i class="bi bi-link-45deg"></i> Preguntas Frecuentes</a>
+                    <a href="#" class="quick-link"><i class="bi bi-link-45deg"></i> Guías de Usuario</a>
+                    <a href="#" class="quick-link"><i class="bi bi-link-45deg"></i> Estado del Sistema</a>
+                    <a href="#" class="quick-link"><i class="bi bi-link-45deg"></i> Política de Privacidad</a>
+                </div>
+            </div>
+
+            <div class="footer-card">
+                <h3><i></i> Horarios de Atención</h3>
+                <div class="hours-info">
+                    <div class="hours-item">
+                        <span>Lunes - Viernes:</span>
+                        <span>8:00 AM - 6:00 PM</span>
+                    </div>
+                    <div class="hours-item">
+                        <span>Sábados:</span>
+                        <span>9:00 AM - 2:00 PM</span>
+                    </div>
+                    <div class="hours-item">
+                        <span>Domingos:</span>
+                        <span>Cerrado</span>
+                    </div>
+                    <div class="emergency-info">
+                        <i></i>
+                        <span>Soporte de emergencia 24/7 disponible</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2025 HelpCore - Todos los derechos reservados</p>
+        </div>
+    </div>
+</footer>

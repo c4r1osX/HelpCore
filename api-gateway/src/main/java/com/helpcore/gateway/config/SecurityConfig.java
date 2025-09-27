@@ -7,20 +7,20 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.web.cors.reactive.CorsWebFilter;
 import com.helpcore.gateway.filter.AuthenticationFilter;
 
+// * - Definir qué endpoints requieren autenticación
+// * - Configurar el filtro de validación JWT
+// * - Integrar CORS con security
+// * - Manejar excepciones de seguridad
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
     private final AuthenticationFilter authenticationFilter;
-    private final CorsWebFilter corsWebFilter;
 
-    public SecurityConfig(AuthenticationFilter authenticationFilter,
-                          CorsWebFilter corsWebFilter) {
+    public SecurityConfig(AuthenticationFilter authenticationFilter) {
         this.authenticationFilter = authenticationFilter;
-        this.corsWebFilter = corsWebFilter;
     }
 
     @Bean
@@ -29,31 +29,34 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .httpBasic(basic -> basic.disable())
                 .formLogin(form -> form.disable())
-                .cors(cors -> cors.disable())
+
+                // NO CONFIGURAR CORS AQUÍ - Se maneja en Gateway
 
                 .authorizeExchange(exchanges -> exchanges
-                        // RUTAS PÚBLICAS - AHORA CON /api/auth/**
+                        // RUTAS PÚBLICAS
                         .pathMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
-                        .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll() // PERMITIR OPTIONS
 
-                        // Health checks y documentación
+                        // Health checks y métricas públicas
                         .pathMatchers(HttpMethod.GET, "/health").permitAll()
-                        .pathMatchers(HttpMethod.GET, "/actuator/**").permitAll()
+                        .pathMatchers(HttpMethod.GET, "/api/docs/**").permitAll()
+                        .pathMatchers(HttpMethod.GET, "/actuator/health").permitAll()
 
-                        // Endpoints de fallback
+                        // Fallback endpoints
                         .pathMatchers("/fallback/**").permitAll()
 
-                        // RUTAS PROTEGIDAS
+                        // RUTAS QUE REQUIEREN AUTENTICACIÓN
                         .pathMatchers("/api/auth/refresh").authenticated()
+                        .pathMatchers("/api/metrics").authenticated()
+                        .pathMatchers("/actuator/**").authenticated()
 
-                        // Cualquier otra ruta requiere autenticación
+                        // CUALQUIER OTRA RUTA
                         .anyExchange().authenticated()
                 )
 
-                // FILTROS PERSONALIZADOS
-                .addFilterBefore(authenticationFilter, SecurityWebFiltersOrder.AUTHORIZATION)
-                .addFilterAfter(corsWebFilter, SecurityWebFiltersOrder.CORS)
+                // SOLO EL FILTRO DE AUTENTICACIÓN
+                .addFilterAfter(authenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
 
                 // EXCEPCIONES
                 .exceptionHandling(exceptions -> exceptions
@@ -66,7 +69,7 @@ public class SecurityConfig {
                             String body = """
                         {
                             "error": "Unauthorized",
-                            "message": "Authentication required",
+                            "message": "JWT token is missing or invalid",
                             "code": 401,
                             "timestamp": "%s"
                         }
@@ -87,7 +90,7 @@ public class SecurityConfig {
                             String body = """
                         {
                             "error": "Forbidden",
-                            "message": "Insufficient permissions",
+                            "message": "Insufficient permissions for this resource",
                             "code": 403,
                             "timestamp": "%s"
                         }
@@ -99,6 +102,7 @@ public class SecurityConfig {
                             return exchange.getResponse().writeWith(reactor.core.publisher.Mono.just(buffer));
                         })
                 )
+
                 .build();
     }
 }

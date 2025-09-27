@@ -3,11 +3,11 @@ server:
 
 spring:
   application:
-      name: auth-service
+    name: auth-service
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://mysql:3306/DB_HELPCORE_SEGURIDAD?useSSL=false&serverTimezone=UTC}
-    username: ${SPRING_DATASOURCE_USERNAME:root}
-    password: ${SPRING_DATASOURCE_PASSWORD:mysql}
+    url: jdbc:mysql://localhost:3306/DB_HELPCORE_SEGURIDAD?useSSL=false&serverTimezone=UTC
+    username: root
+    password: mysql
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -28,12 +28,9 @@ app:
         expiration: 60000
 
 eureka:
-  instance:
-    hostname: localhost
-    prefer-ip-address: false
   client:
     service-url:
-      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://service-register:8761/eureka/}
+      defaultZone: http://localhost:8761/eureka
     fetch-registry: true
     register-with-eureka: true
 
