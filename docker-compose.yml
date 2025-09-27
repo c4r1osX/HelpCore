@@ -1,34 +1,53 @@
 version: '3.8'
+
 networks:
-  microservices-network:
+  helpcore-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  mysql_data:
+    driver: local
+  config_data:
+    driver: local
 
 services:
   mysql:
     image: mysql:8.0
-    container_name: mysql-db
+    container_name: helpcore-mysql
     environment:
       MYSQL_ROOT_PASSWORD: mysql
+      MYSQL_DATABASE: DB_HELPCORE_SEGURIDAD
+      MYSQL_USER: helpcore
+      MYSQL_PASSWORD: helpcore123
     ports:
       - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
-      - microservices-network
+      helpcore-network:
+        ipv4_address: 172.20.0.10
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD" ]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
 
   service-register:
-    build: ./service-register
-    container_name: service-register
+    build:
+      context: ./service-register
+      dockerfile: Dockerfile
+    container_name: helpcore-eureka
     ports:
       - "8761:8761"
     networks:
-      - microservices-network
+      helpcore-network:
+        ipv4_address: 172.20.0.20
     restart: unless-stopped
     environment:
       - SPRING_PROFILES_ACTIVE=docker
@@ -36,40 +55,91 @@ services:
       - EUREKA_CLIENT_FETCH_REGISTRY=false
       - SPRING_APPLICATION_NAME=service-register
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
   config-server:
-    build: ./config-server
-    container_name: config-server
+    build:
+      context: ./config-server
+      dockerfile: Dockerfile
+    container_name: helpcore-config
     ports:
       - "8888:8888"
+    volumes:
+      - config_data:/app/config
     networks:
-      - microservices-network
+      helpcore-network:
+        ipv4_address: 172.20.0.21
     depends_on:
-      - service-register
-      - mysql
+      service-register:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
     restart: unless-stopped
     environment:
-      - SPRING_PROFILES_ACTIVE=native
+      - SPRING_PROFILES_ACTIVE=native,docker
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://service-register:8761/eureka/
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      test: [ "CMD", "curl", "-f", "http://admin:config123@localhost:8888/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: helpcore-auth
+    ports:
+      - "8081:8081"
+    networks:
+      helpcore-network:
+        ipv4_address: 172.20.0.30
+    depends_on:
+      mysql:
+        condition: service_healthy
+      service-register:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - SPRING_CLOUD_CONFIG_USERNAME=admin
+      - SPRING_CLOUD_CONFIG_PASSWORD=config123
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/DB_HELPCORE_SEGURIDAD?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=mysql
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-register:8761/eureka/
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
 
   api-gateway:
-    build: ./api-gateway
-    container_name: api-gateway
+    build:
+        context: ./api-gateway
+        dockerfile: Dockerfile
+    container_name: helpcore-gateway
     ports:
       - "8080:8080"
     networks:
-      - microservices-network
+      helpcore-network:
+        ipv4_address: 172.20.0.40
     depends_on:
-      - service-register
-      - config-server
+      service-register:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
@@ -78,50 +148,77 @@ services:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-register:8761/eureka/
       - JWT_SECRET=QmFzZTY0RW5jb2RlZEtleVNlZ3VyYUV4YW1wbGVEYXRhIQ==
     restart: unless-stopped
-
-  auth-service:
-    build: ./auth-service
-    container_name: auth-service
-    ports:
-      - "8081:8081"
-    networks:
-      - microservices-network
-    depends_on:
-      - mysql
-      - service-register
-      - config-server
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
-      - SPRING_CLOUD_CONFIG_USERNAME=admin
-      - SPRING_CLOUD_CONFIG_PASSWORD=config123
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/DB_HELPCORE_SEGURIDAD?useSSL=false&serverTimezone=UTC
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=mysql
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-register:8761/eureka/
-    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
 
   ticket-service:
-    build: ./ticket-service
-    container_name: ticket-service
+    build:
+      context: ./ticket-service
+      dockerfile: Dockerfile
+    container_name: helpcore-tickets
     ports:
       - "8082:8082"
     networks:
-      - microservices-network
+      helpcore-network:
+        ipv4_address: 172.20.0.31
     depends_on:
-      - mysql
-      - service-register
-      - config-server
+      mysql:
+        condition: service_healthy
+      service-register:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
       - SPRING_CLOUD_CONFIG_USERNAME=admin
       - SPRING_CLOUD_CONFIG_PASSWORD=config123
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/DB_HELPCORE_OPERATIVA?useSSL=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/DB_HELPCORE_OPERATIVA?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=mysql
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-register:8761/eureka/
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8082/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
 
-volumes:
-  mysql_data:
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: helpcore-notifications
+    ports:
+      - "8083:8083"
+    networks:
+      helpcore-network:
+        ipv4_address: 172.20.0.32
+    depends_on:
+      mysql:
+        condition: service_healthy
+      service-register:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - SPRING_CLOUD_CONFIG_USERNAME=admin
+      - SPRING_CLOUD_CONFIG_PASSWORD=config123
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/DB_HELPCORE_OPERATIVA?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=mysql
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-register:8761/eureka/
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8083/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s

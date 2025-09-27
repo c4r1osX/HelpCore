@@ -9,7 +9,7 @@ FROM eclipse-temurin:17-jre-alpine
 RUN apk add --no-cache curl
 WORKDIR /app
 
-COPY --from=build /app/target/*.jar api-gateway.jar
+COPY --from=build /app/target/*.jar notification-service.jar
 
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app/api-gateway.jar"]
+EXPOSE 8083
+ENTRYPOINT ["java", "-jar", "/app/notification-service.jar"]
