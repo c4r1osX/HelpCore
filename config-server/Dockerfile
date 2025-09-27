@@ -6,15 +6,8 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:17-jre-alpine
-RUN apk add --no-cache \
-    curl \
-    bash \
-    tzdata
+RUN apk add --no-cache curl
 WORKDIR /app
-
-RUN mkdir -p /app/config && \
-    mkdir -p /app/logs && \
-    chown -R spring:spring /app
 
 COPY --from=build /app/target/*.jar config-server.jar
 COPY --from=build /app/src/main/resources/config/ /app/config/

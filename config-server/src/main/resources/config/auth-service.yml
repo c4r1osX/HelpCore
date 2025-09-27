@@ -5,14 +5,14 @@ spring:
   application:
     name: auth-service
   datasource:
-    url: jdbc:mysql://localhost:3306/DB_HELPCORE_SEGURIDAD?useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://mysql:3306/DB_HELPCORE_SEGURIDAD?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
     password: mysql
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -30,9 +30,16 @@ app:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: http://service-register:8761/eureka/
     fetch-registry: true
     register-with-eureka: true
+    initial-instance-info-replication-interval-seconds: 10
+    instance-info-replication-interval-seconds: 10
+  instance:
+    hostname: auth-service
+    prefer-ip-address: false
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
 
 logging:
   level:
@@ -40,89 +47,3 @@ logging:
     org.springframework.web: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-
-# ---
-# # Perfil de desarrollo
-# spring:
-#   config:
-#     activate:
-#       on-profile: dev
-#   datasource:
-#     url: jdbc:mysql://localhost:3306/DB_HELPCORE_SEGURIDAD?useSSL=false&serverTimezone=UTC
-#     username: root
-#     password: mysql
-#     driver-class-name: com.mysql.cj.jdbc.Driver
-#   jpa:
-#     hibernate:
-#       ddl-auto: update
-#     show-sql: true
-
-# app:
-#   security:
-#     jwt:
-#       secret: QmFzZTY0RW5jb2RlZEtleVNlZ3VyYUV4YW1wbGVEYXRhIQ==
-#       expiration: 86400000
-#       refresh-token:
-#         expiration: 604800000
-
-# server:
-#   port: 8080
-
-# ---
-# # Perfil de testing
-# spring:
-#   config:
-#     activate:
-#       on-profile: test
-#   datasource:
-#     url: jdbc:mysql://localhost:3306/DB_HELPCORE_SEGURIDAD_TEST?useSSL=false&serverTimezone=UTC
-#     username: root
-#     password: mysql
-#     driver-class-name: com.mysql.cj.jdbc.Driver
-#   jpa:
-#     hibernate:
-#       ddl-auto: create-drop
-#     show-sql: false
-
-# app:
-#   security:
-#     jwt:
-#       secret: VGVzdFNlY3JldEtleUZvclRlc3RpbmdFbnZpcm9ubWVudA==
-#       expiration: 3600000
-#       refresh-token:
-#         expiration: 7200000
-
-# server:
-#   port: 8081
-
-# ---
-# # Perfil de producción
-# spring:
-#   config:
-#     activate:
-#       on-profile: prod
-#   datasource:
-#     url: jdbc:mysql://prod-server:3306/DB_HELPCORE_SEGURIDAD_PROD?useSSL=true&serverTimezone=UTC
-#     username: ${DB_USER:produser}
-#     password: ${DB_PASS:prodpass}
-#     driver-class-name: com.mysql.cj.jdbc.Driver
-#   jpa:
-#     hibernate:
-#       ddl-auto: validate
-#     show-sql: false
-
-# app:
-#   security:
-#     jwt:
-#       secret: ${JWT_SECRET:UHJvZHVjdGlvblNlY3JldEtleUZvckpXVEVuY3J5cHRpb24=}
-#       expiration: 86400000
-#       refresh-token:
-#         expiration: 604800000
-
-# server:
-#   port: 8082
-
-# eureka:
-#   client:
-#     service-url:
-#       defaultZone: ${EUREKA_URL:http://eureka-prod:8761/eureka/

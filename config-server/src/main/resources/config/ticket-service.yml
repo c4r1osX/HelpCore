@@ -4,16 +4,15 @@ server:
 spring:
   application:
     name: ticket-service
-
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://mysql:3306/DB_HELPCORE_OPERATIVA?useSSL=false&serverTimezone=UTC}
-    username: ${SPRING_DATASOURCE_USERNAME:root}
-    password: ${SPRING_DATASOURCE_PASSWORD:mysql}
+    url: jdbc:mysql://mysql:3306/DB_HELPCORE_OPERATIVA?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: mysql
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -23,6 +22,13 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://service-register:8761/eureka/}
+      defaultZone: http://service-register:8761/eureka/
     fetch-registry: true
     register-with-eureka: true
+    initial-instance-info-replication-interval-seconds: 10
+    instance-info-replication-interval-seconds: 10
+  instance:
+    hostname: ticket-service
+    prefer-ip-address: false
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30

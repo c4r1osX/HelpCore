@@ -11,5 +11,5 @@ WORKDIR /app
 
 COPY --from=build /app/target/*.jar ticket-service.jar
 
-EXPOSE 8761
+EXPOSE 8082
 ENTRYPOINT ["java", "-jar", "/app/ticket-service.jar"]

@@ -1,16 +1,18 @@
+server:
+  port: 8083
+
 spring:
   application:
     name: notification-service
-
   datasource:
-    url: jdbc:mysql://localhost:3306/DB_HELPCORE_OPERATIVA?useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://mysql:3306/DB_HELPCORE_OPERATIVA?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
     password: mysql
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -31,14 +33,29 @@ spring:
 
   cloud:
     config:
-      enabled: false
+      enabled: true
       import-check:
         enabled: false
-
-server:
-  port: 8083
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://service-register:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+    initial-instance-info-replication-interval-seconds: 10
+    instance-info-replication-interval-seconds: 10
+  instance:
+    hostname: notification-service
+    prefer-ip-address: false
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+
+logging:
+  level:
+    com.helpcore: DEBUG
+    com.netflix.eureka: DEBUG
+    com.netflix.discovery: DEBUG
+    org.springframework.cloud.config: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
