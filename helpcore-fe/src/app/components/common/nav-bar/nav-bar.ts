@@ -7,5 +7,17 @@ import { Component } from '@angular/core';
   styleUrl: './nav-bar.css'
 })
 export class NavBar {
+  activeLink: string = 'inicio'; // valor por defecto
 
+  setActive(link: string) {
+    this.activeLink = link;
+  }
+
+  login() {
+    console.log('Iniciar sesión');
+  }
+
+  logout() {
+    console.log('Cerrar sesión');
+  }
 }

@@ -9,13 +9,15 @@ import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Inicio } from './components/inicio/inicio';
 import { NavBar } from './components/common/nav-bar/nav-bar';
+import { Ticket } from './components/ticket/ticket';
 
 @NgModule({
   declarations: [
     App,
     Login,
     Inicio,
-    NavBar
+    NavBar,
+    Ticket
   ],
   imports: [
     BrowserModule,

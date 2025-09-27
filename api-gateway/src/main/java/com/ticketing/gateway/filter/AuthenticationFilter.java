@@ -147,7 +147,9 @@ public class AuthenticationFilter implements WebFilter {
     private boolean isPublicPath(String path) {
         // Rutas de autenticación
         if (path.startsWith("/api/auth/login") ||
-            path.startsWith("/api/auth/register")) {
+            path.startsWith("/api/auth/register") ||
+            path.startsWith("/api/ticket/crear-invitado") ||
+                path.startsWith("/api/categoria-ticket/listar")) {
             return true;
         }
 

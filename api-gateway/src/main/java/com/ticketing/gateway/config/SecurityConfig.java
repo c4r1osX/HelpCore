@@ -38,7 +38,8 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll() // PERMITIR OPTIONS
-
+                        .pathMatchers(HttpMethod.POST, "/api/ticket/crear-invitado").permitAll()
+                        .pathMatchers(HttpMethod.POST, "/api/categoria-ticket/listar").permitAll()
                         // Health checks y métricas públicas
                         .pathMatchers(HttpMethod.GET, "/health").permitAll()
                         .pathMatchers(HttpMethod.GET, "/api/docs/**").permitAll()

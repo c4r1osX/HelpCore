@@ -44,6 +44,14 @@ public class GatewayConfig {
                         )
                         .uri("lb://auth-service"))
 
+                .route("ticket-service", r -> r
+                        .path("/api/{segment}/**")
+                        .filters(f -> f
+                                .rewritePath("/api/(?<prefix>ticket|categoria-ticket)(?<remaining>/?.*)", "/${prefix}${remaining}")
+                                .addRequestHeader("X-Gateway-Debug", "true")
+                                .addResponseHeader("X-Gateway-Route", "ticket-service")
+                        )
+                        .uri("lb://ticket-service"))
                 .build();
     }
 

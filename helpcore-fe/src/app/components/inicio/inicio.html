@@ -57,10 +57,10 @@
                         <p>Crea una nueva solicitud de soporte técnico</p>
 
                         <div class="action-buttons">
-                            <button class="btn text-white bg-black" onclick="createTicket('logged')">
-                                <i class="bi bi-person-check"></i> Crear con Cuenta
+                            <button class="btn text-white bg-black" [routerLink]="'/login'">
+                                <i class="bi bi-person-check"></i> Iniciar Sesión
                             </button>
-                            <button class="btn" onclick="createTicket('guest')">
+                            <button class="btn" [routerLink]="'/invitado'">
                                 <i class="bi bi-person"></i> Continuar como Invitado
                             </button>
                         </div>
