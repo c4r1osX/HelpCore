@@ -1,0 +1,127 @@
+version: '3.8'
+networks:
+  microservices-network:
+    driver: bridge
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - microservices-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  service-register:
+    build: ./service-register
+    container_name: service-register
+    ports:
+      - "8761:8761"
+    networks:
+      - microservices-network
+    restart: unless-stopped
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
+      - EUREKA_CLIENT_FETCH_REGISTRY=false
+      - SPRING_APPLICATION_NAME=service-register
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  config-server:
+    build: ./config-server
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    networks:
+      - microservices-network
+    depends_on:
+      - service-register
+      - mysql
+    restart: unless-stopped
+    environment:
+      - SPRING_PROFILES_ACTIVE=native
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    networks:
+      - microservices-network
+    depends_on:
+      - service-register
+      - config-server
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - SPRING_CLOUD_CONFIG_USERNAME=admin
+      - SPRING_CLOUD_CONFIG_PASSWORD=config123
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-register:8761/eureka/
+      - JWT_SECRET=QmFzZTY0RW5jb2RlZEtleVNlZ3VyYUV4YW1wbGVEYXRhIQ==
+    restart: unless-stopped
+
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    ports:
+      - "8081:8081"
+    networks:
+      - microservices-network
+    depends_on:
+      - mysql
+      - service-register
+      - config-server
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - SPRING_CLOUD_CONFIG_USERNAME=admin
+      - SPRING_CLOUD_CONFIG_PASSWORD=config123
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/DB_HELPCORE_SEGURIDAD?useSSL=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=mysql
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-register:8761/eureka/
+    restart: unless-stopped
+
+  ticket-service:
+    build: ./ticket-service
+    container_name: ticket-service
+    ports:
+      - "8082:8082"
+    networks:
+      - microservices-network
+    depends_on:
+      - mysql
+      - service-register
+      - config-server
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - SPRING_CLOUD_CONFIG_USERNAME=admin
+      - SPRING_CLOUD_CONFIG_PASSWORD=config123
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/DB_HELPCORE_OPERATIVA?useSSL=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=mysql
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-register:8761/eureka/
+    restart: unless-stopped
+
+volumes:
+  mysql_data:

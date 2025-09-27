@@ -1,9 +1,7 @@
-server:
-  port: 8080
-
 spring:
   application:
     name: api-gateway
+
   cloud:
     gateway:
       discovery:
@@ -11,25 +9,53 @@ spring:
           enabled: true
           lower-case-service-id: true
 
-# EUREKA CLIENT
+      # Configuración de rutas estáticas y dinámicas
+      routes:
+        # ===== AUTH SERVICE =====
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - RewritePath=/api/auth/(?<segment>.*), /auth/${segment}
+
+        # ===== TICKET SERVICE =====
+        - id: ticket-service
+          uri: lb://ticket-service
+          predicates:
+            - Path=/api/ticket/**
+          filters:
+            - RewritePath=/api/ticket/(?<segment>.*), /ticket/${segment}
+
+
+server:
+  port: 8080
+  error:
+    include-message: always
+
+# ===== EUREKA CLIENT =====
 eureka:
-  instance:
-    hostname: localhost
-    prefer-ip-address: false
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://service-register:8761/eureka/}
+    fetch-registry: true
+    register-with-eureka: true
 
-# JWT CONFIGURATION
+## ===== CONFIG SERVER =====
+#spring.config.import: "optional:configserver:http://localhost:8888"
+
+
+# ===== JWT CONFIGURATION =====
 jwt:
   secret: QmFzZTY0RW5jb2RlZEtleVNlZ3VyYUV4YW1wbGVEYXRhIQ==
   expiration: 60000
 
-# LOGGING
+# ===== LOGGING =====
 logging:
   level:
     com.ticketing.gateway: DEBUG
     org.springframework.cloud.gateway: INFO
     org.springframework.security: INFO
+    io.github.resilience4j: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
