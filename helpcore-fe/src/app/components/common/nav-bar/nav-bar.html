@@ -42,11 +42,11 @@
                 <div id="user-info-mobile" class="user-info hidden">
                   <i class="bi bi-person-circle"></i>
                   <span>Usuario</span>
-                  <button class="btn btn-outline btn-sm w-100 mt-2" onclick="logout()">
+                  <button class="btn btn-outline btn-sm w-100 mt-2" (click)="onLogout()">
                     <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
                   </button>
                 </div>
-                <button id="login-btn-mobile" class="btn btn-primary w-100 mt-2" onclick="login()">
+                <button id="login-btn-mobile" class="btn btn-primary w-100 mt-2" (click)="onLogin()">
                   <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
                 </button>
               </li>
