@@ -37,6 +37,7 @@ public class SecurityConfig {
                         // RUTAS PÚBLICAS
                         .pathMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
+                        .pathMatchers(HttpMethod.POST, "/api/auth/logout").permitAll()
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll() // PERMITIR OPTIONS
                         .pathMatchers(HttpMethod.POST, "/api/ticket/crear-invitado").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/categoria-ticket/listar").permitAll()
@@ -49,7 +50,7 @@ public class SecurityConfig {
                         .pathMatchers("/fallback/**").permitAll()
 
                         // RUTAS QUE REQUIEREN AUTENTICACIÓN
-                        .pathMatchers("/api/auth/refresh").authenticated()
+                        .pathMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll() // pa probar refresh
                         .pathMatchers("/api/metrics").authenticated()
                         .pathMatchers("/actuator/**").authenticated()
 

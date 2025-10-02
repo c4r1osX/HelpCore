@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from '../../../services/auth-service';
 
 @Component({
   selector: 'app-nav-bar',
@@ -7,17 +9,23 @@ import { Component } from '@angular/core';
   styleUrl: './nav-bar.css'
 })
 export class NavBar {
-  activeLink: string = 'inicio'; // valor por defecto
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
-  setActive(link: string) {
-    this.activeLink = link;
+  onLogin() {
+    this.router.navigate(['/login']);
   }
 
-  login() {
-    console.log('Iniciar sesión');
-  }
-
-  logout() {
-    console.log('Cerrar sesión');
+  onLogout() {
+    this.authService.logout().subscribe({
+      next: () => {
+        this.router.navigate(['/inicio']);
+      },
+      error: (error) => {
+        console.error('Error en logout:', error);
+      }
+    });
   }
 }
