@@ -5,12 +5,15 @@ import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsWebFilter;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
-//- Rutas dinámicas
-//- Resolvers para rate limiting
-//- Fallbacks para circuit breaker
+import java.util.Arrays;
 
 @Configuration
 public class GatewayConfig {
@@ -48,35 +51,22 @@ public class GatewayConfig {
     }
 
     // Key Resolver (Identificar IP del cliente)
-    // Alternativa para request sin autenticacion
     @Bean
     public KeyResolver ipKeyResolver() {
         return exchange -> Mono.just(getClientIp(exchange));
     }
 
     private String getClientIp(ServerWebExchange exchange) {
-        // ######## PRIORIDAD 1: ########
-        // ServerWebExchange: Interfaz de Spring WebFlux, representa el contexto completo de una solicitud HTTP en el servidor.
-        // X-Forwarded-For: Header HTTP estandar para identificar la IP original del cliente cuando hace una peticion.
-        // El header puede contener múltiples IPs (la primera es la ip real del cliente, y las demas proxies intermedios)
-        // Formato: "client_ip, proxy1_ip, proxy2_ip, proxy3_ip"
         String xForwardedFor = exchange.getRequest().getHeaders().getFirst("X-Forwarded-For");
         if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
             return xForwardedFor.split(",")[0].trim();
-            // split(",") → ["203.0.113.1", " 198.51.100.2", " 192.0.2.1"]
-            // [0] → "203.0.113.1" (primera IP = cliente real)
-            // trim() → remueve espacios en blanco por si acaso
         }
 
-        // ######## PRIORIDAD 2: ########
-        // X-Real-IP: Header HTTP que transmite la IP real del cliente (No proxys)
-        // Formato: "client_ip"
         String xRealIp = exchange.getRequest().getHeaders().getFirst("X-Real-IP");
         if (xRealIp != null && !xRealIp.isEmpty()) {
-            return xRealIp; // Devolver directamente la ip
+            return xRealIp;
         }
 
-        // Fallback a la IP remota del socket
         return exchange.getRequest().getRemoteAddress() != null
                 ? exchange.getRequest().getRemoteAddress().getAddress().getHostAddress()
                 : "unknown";
