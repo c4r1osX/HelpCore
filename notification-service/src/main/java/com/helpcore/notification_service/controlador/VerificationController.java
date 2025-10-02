@@ -18,7 +18,7 @@ public class VerificationController {
     @PostMapping("/enviar-correo")
     public ResponseEntity<String> sendCode(@RequestBody EmailVerificationDto request) {
         try {
-            emailVerificationService.sendVerificationCode(request.getEmail(), request.getEmail());
+            emailVerificationService.sendVerificationCode(request.getEmail());
             return ResponseEntity.ok("Código de verificación enviado a " + request.getEmail());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error al enviar el correo: " + e.getMessage());

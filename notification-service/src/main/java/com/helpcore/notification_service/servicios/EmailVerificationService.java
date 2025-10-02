@@ -19,9 +19,9 @@ public class EmailVerificationService {
     private final ConcurrentHashMap<String, String> codes = new ConcurrentHashMap<>();
     private final SecureRandom random = new SecureRandom();
 
-    public void sendVerificationCode(String to, String email) throws Exception {
+    public void sendVerificationCode(String email) throws Exception {
         String codigo = String.valueOf(100000 + random.nextInt(900000));
-        codes.put(to, codigo);
+        codes.put(email, codigo);
 
         Context context = new Context();
         context.setVariable("email", email);
@@ -30,9 +30,9 @@ public class EmailVerificationService {
         String body = templateEngine.process("codigo-verificated", context);
 
         MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-        helper.setTo(to);
+        helper.setTo(email);
         helper.setSubject("Código de verificación");
         helper.setText(body, true);
 
