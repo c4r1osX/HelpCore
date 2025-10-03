@@ -4,6 +4,7 @@ server:
 spring:
   application:
     name: api-gateway
+
   cloud:
     gateway:
       # CONFIGURACIÓN GLOBAL DE CORS
@@ -32,6 +33,22 @@ spring:
           uri: lb://auth-service
           predicates:
             - Path=/api/auth/**
+          filters:
+            - StripPrefix=0
+          metadata:
+            cors:
+              allowedOriginPatterns:
+                - "http://localhost:4200"
+                - "http://127.0.0.1:4200"
+              allowedMethods: "*"
+              allowedHeaders: "*"
+              allowCredentials: true
+
+        - id: ticket-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/ticket/**
+            - Path=/api/categoria-ticket/**
           filters:
             - StripPrefix=0
           metadata:
@@ -74,6 +91,9 @@ eureka:
     initial-instance-info-replication-interval-seconds: 10
     instance-info-replication-interval-seconds: 10
 
+
+
+# ===== JWT CONFIGURATION =====
 jwt:
   secret: QmFzZTY0RW5jb2RlZEtleVNlZ3VyYUV4YW1wbGVEYXRhIQ==
   expiration: 60000

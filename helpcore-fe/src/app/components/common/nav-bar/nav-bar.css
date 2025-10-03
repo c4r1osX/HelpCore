@@ -35,7 +35,7 @@
 
 /* Navbar */
 .navbar-nav .nav-link {
-    color: rgb(0, 0, 0);
+    color: rgb(118, 118, 118);
     text-decoration: none;
     transition: color 0.3s ease;
 }

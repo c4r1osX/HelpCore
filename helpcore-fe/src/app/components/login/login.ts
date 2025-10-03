@@ -10,35 +10,55 @@ import { Router } from '@angular/router';
   styleUrl: './login.css'
 })
 export class Login {
-  loginForm: FormGroup;
+ loginForm: FormGroup;
   mensaje: string | null = null;
+  isLoading = false;
 
-  constructor(private formBuilder: FormBuilder, private authService: AuthService, private router: Router) {
+  constructor(
+    private formBuilder: FormBuilder, 
+    private authService: AuthService,
+    private router: Router
+  ) {
     this.loginForm = this.formBuilder.group({
-      nombreUsuario: ['', Validators.required],
-      contrasena: ['', Validators.required]
+      nombreUsuario: ['', [Validators.required, Validators.minLength(3)]],
+      contrasena: ['', [Validators.required, Validators.minLength(3)]]
     });
   }
 
-  login(){
+  login() {
     this.mensaje = null;
-    if(this.loginForm.valid){
+    
+    if (this.loginForm.valid) {
+      this.isLoading = true;
+      
       this.authService.login(this.loginForm.value).subscribe({
-        next: (login) =>{
-          localStorage.setItem('token', login.access_token);
-          this.router.navigate(['/inicio'])
+        next: (response) => {
+          this.isLoading = false;
+          
+          console.log('Login response:', response);
+          console.log('Cookies después del login:', document.cookie);
+          
+          this.mensaje = "Login exitoso - Redirigiendo...";
+          
+          setTimeout(() => {
+            this.router.navigate(['/inicio']);
+          }, 1000);
         },
         error: (error) => {
+          this.isLoading = false;
+          console.error('Error en login:', error);
+          
           if (error.status === 401) {
             this.mensaje = "Usuario o contraseña inválidos";
-            return;
+          } else if (error.status === 0) {
+            this.mensaje = "Error de conexión. Verifica que el servidor esté corriendo.";
           } else {
             this.mensaje = "Ha ocurrido un error inesperado.";
-            console.log(error)
-            return;
           }
         }
       });
+    } else {
+      this.mensaje = "Por favor completa todos los campos correctamente.";
     }
   }
 }

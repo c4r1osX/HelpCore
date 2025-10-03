@@ -37,12 +37,12 @@
                             </tr>
                             <tr>
                                 <td style="font-weight: bold;">Creado por:</td>
-                                <td><span th:text="${creadoPor}"></span></td>
+                                <td><span th:text="${correoCreador}"></span></td>
                             </tr>
                         </table>
 
                         <p style="margin-top: 20px; font-size: 14px; color: #555;">
-                            ✅ Por favor, revisa el ticket lo antes posible.
+                            <span th:text="${mensajePersonalizado}"></span>
                         </p>
                     </td>
                 </tr>

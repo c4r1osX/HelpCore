@@ -15,18 +15,37 @@ public class EmailService {
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
 
-    public void sendTicketCreatedEmail(String to, String subject, TicketCreatedDto ticket) {
+    public void sendTicketCreatedEmails(TicketCreatedDto ticket, String soporte) {
+        String subject = "Nuevo ticket creado: " + ticket.getTitulo();
+
+        sendEmailWithTemplate(
+                ticket.getCorreoCreador(),
+                subject,
+                ticket,
+                "✅ Por favor, atento a su ticket, se le dará respuesta pronto."
+        );
+
+        sendEmailWithTemplate(
+                soporte,
+                subject,
+                ticket,
+                "✅ Por favor, revise el ticket lo antes posible"
+        );
+    }
+
+    private void sendEmailWithTemplate(String creador, String subject, TicketCreatedDto ticket, String mensajePersonalizado) {
         Context context = new Context();
         context.setVariable("ticketId", ticket.getTicketId());
         context.setVariable("titulo", ticket.getTitulo());
         context.setVariable("descripcion", ticket.getDescripcion());
-        context.setVariable("creadoPor", ticket.getCreadoPor());
+        context.setVariable("correoCreador", ticket.getCorreoCreador());
+        context.setVariable("soporte", mensajePersonalizado);
 
         String body = templateEngine.process("ticket-created", context);
 
         MimeMessagePreparator message = mimeMessage -> {
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            helper.setTo(to);
+            helper.setTo(creador);
             helper.setSubject(subject);
             helper.setText(body, true);
         };

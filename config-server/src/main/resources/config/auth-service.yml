@@ -5,14 +5,14 @@ spring:
   application:
     name: auth-service
   datasource:
-    url: jdbc:mysql://mysql:3306/DB_HELPCORE_SEGURIDAD?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/DB_HELPCORE_SEGURIDAD?allowPublicKeyRetrieval=true&sslMode=DISABLED&serverTimezone=UTC
     username: root
     password: mysql
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: update #cambio
     show-sql: true
     properties:
       hibernate:
@@ -25,7 +25,12 @@ app:
       secret: QmFzZTY0RW5jb2RlZEtleVNlZ3VyYUV4YW1wbGVEYXRhIQ==
       expiration: 60000
       refresh-token:
-        expiration: 60000
+        expiration: 300000
+    cookies:
+      secure: false        # true en producción
+      same-site: lax
+      http-only: true
+
 
 eureka:
   client:
@@ -41,9 +46,107 @@ eureka:
     lease-renewal-interval-in-seconds: 10
     lease-expiration-duration-in-seconds: 30
 
-logging:
-  level:
-    com.helpcore: DEBUG
-    org.springframework.web: DEBUG
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+      cors:
+        allowed-origins:
+          - "http://localhost:4200"
+          - "http://127.0.0.1:4200"
+        allowed-methods:
+          - "GET"
+          - "POST"
+          - "PUT"
+          - "DELETE"
+          - "OPTIONS"
+        allowed-headers: "*"
+        allow-credentials: true
+        max-age: 3600
+
+# ---
+# # Perfil de desarrollo
+# spring:
+#   config:
+#     activate:
+#       on-profile: dev
+#   datasource:
+#     url: jdbc:mysql://localhost:3306/DB_HELPCORE_SEGURIDAD?useSSL=false&serverTimezone=UTC
+#     username: root
+#     password: mysql
+#     driver-class-name: com.mysql.cj.jdbc.Driver
+#   jpa:
+#     hibernate:
+#       ddl-auto: update
+#     show-sql: true
+
+# app:
+#   security:
+#     jwt:
+#       secret: QmFzZTY0RW5jb2RlZEtleVNlZ3VyYUV4YW1wbGVEYXRhIQ==
+#       expiration: 86400000
+#       refresh-token:
+#         expiration: 604800000
+
+# server:
+#   port: 8080
+
+# ---
+# # Perfil de testing
+# spring:
+#   config:
+#     activate:
+#       on-profile: test
+#   datasource:
+#     url: jdbc:mysql://localhost:3306/DB_HELPCORE_SEGURIDAD_TEST?useSSL=false&serverTimezone=UTC
+#     username: root
+#     password: mysql
+#     driver-class-name: com.mysql.cj.jdbc.Driver
+#   jpa:
+#     hibernate:
+#       ddl-auto: create-drop
+#     show-sql: false
+
+# app:
+#   security:
+#     jwt:
+#       secret: VGVzdFNlY3JldEtleUZvclRlc3RpbmdFbnZpcm9ubWVudA==
+#       expiration: 3600000
+#       refresh-token:
+#         expiration: 7200000
+
+# server:
+#   port: 8081
+
+# ---
+# # Perfil de producción
+# spring:
+#   config:
+#     activate:
+#       on-profile: prod
+#   datasource:
+#     url: jdbc:mysql://prod-server:3306/DB_HELPCORE_SEGURIDAD_PROD?useSSL=true&serverTimezone=UTC
+#     username: ${DB_USER:produser}
+#     password: ${DB_PASS:prodpass}
+#     driver-class-name: com.mysql.cj.jdbc.Driver
+#   jpa:
+#     hibernate:
+#       ddl-auto: validate
+#     show-sql: false
+
+# app:
+#   security:
+#     jwt:
+#       secret: ${JWT_SECRET:UHJvZHVjdGlvblNlY3JldEtleUZvckpXVEVuY3J5cHRpb24=}
+#       expiration: 86400000
+#       refresh-token:
+#         expiration: 604800000
+
+# server:
+#   port: 8082
+
+# eureka:
+#   client:
+#     service-url:
+#       defaultZone: ${EUREKA_URL:http://eureka-prod:8761/eureka/

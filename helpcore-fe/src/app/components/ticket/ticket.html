@@ -1,0 +1,121 @@
+<div class="ticket-card">
+  <div class="form-header">
+    <h1 class="form-title">Abrir un nuevo Ticket</h1>
+    <p class="form-subtitle">Por favor, complete el siguiente formulario para crear un nuevo ticket.</p>
+  </div>
+
+  <!-- 🔹 Vinculado al formGroup -->
+  <form id="ticketForm" [formGroup]="ticketForm" (ngSubmit)="onSubmit()">
+    <div class="section-title">Información de Contacto</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="fullName">Nombres <span class="required">*</span></label>
+        <input type="text" id="fullName" class="form-input"
+               placeholder="Ingrese sus nombres"
+               formControlName="fullName">
+      </div>
+
+      <div class="form-group">
+        <label for="lastName">Apellidos <span class="required">*</span></label>
+        <input type="text" id="lastName" class="form-input"
+               placeholder="Ingrese sus apellidos"
+               formControlName="lastName">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="dni">DNI <span class="required">*</span></label>
+        <input type="text" id="dni" class="form-input"
+               placeholder="12345678"
+               formControlName="dni">
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Teléfono Móvil <span class="required">*</span></label>
+        <input type="tel" id="phone" class="form-input"
+               placeholder="+51 999 999 999"
+               formControlName="phone">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="studentCode">Código de Alumno <span class="required">*</span></label>
+        <input type="text" id="studentCode" class="form-input"
+               placeholder="A12345678"
+               formControlName="studentCode">
+      </div>
+
+      <div class="form-group">
+        <label for="sede">Sede <span class="required">*</span></label>
+        <select id="sede" class="form-select" formControlName="sede">
+          <option value="">— Seleccionar —</option>
+          <option value="lima">Lima</option>
+          <option value="arequipa">Arequipa</option>
+          <option value="trujillo">Trujillo</option>
+          <option value="chiclayo">Chiclayo</option>
+          <option value="piura">Piura</option>
+          <option value="cusco">Cusco</option>
+          <option value="huancayo">Huancayo</option>
+          <option value="iquitos">Iquitos</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 🔹 Email + botón -->
+    <div class="form-group">
+      <label for="email">Correo electrónico activo <span class="required">*</span></label>
+      <div class="email-row">
+        <input type="email" id="email" class="form-input"
+               placeholder="ejemplo@correo.com"
+               formControlName="email">
+        <button type="button" class="btn btn-secondary"
+                [disabled]="!ticketForm.get('email')?.valid">
+          Enviar código
+        </button>
+      </div>
+    </div>
+
+    <div class="section-title">Temas de ayuda</div>
+
+    <div class="form-group full-width">
+  <label for="helpTopic">Seleccione un tema de ayuda <span class="required">*</span></label>
+  <select id="helpTopic" class="form-select" formControlName="helpTopic">
+    <option value="">— Seleccione un tema de ayuda —</option>
+    <option *ngFor="let categoria of categoriaTickets" [value]="categoria.id_categoria">
+      {{ categoria.nombre }}
+    </option>
+  </select>
+</div>
+
+    <!-- 🔹 Campos dinámicos: aparecen cuando hay un tema de ayuda -->
+    <div *ngIf="ticketForm.get('helpTopic')?.value" class="form-group full-width">
+      <label for="subject">Asunto <span class="required">*</span></label>
+      <input type="text" id="subject" class="form-input"
+             placeholder="Ingrese el asunto"
+             formControlName="subject">
+    </div>
+
+    <div *ngIf="ticketForm.get('helpTopic')?.value" class="form-group full-width">
+      <label for="body">Comentarios / Detalles <span class="required">*</span></label>
+      <textarea id="body" class="form-input"
+                rows="5"
+                placeholder="Escriba aquí los detalles de su consulta"
+                formControlName="body"></textarea>
+    </div>
+
+    <div class="button-group">
+      <button type="submit" class="btn btn-primary" id="createBtn" [disabled]="ticketForm.invalid">
+        Crear Ticket
+      </button>
+      <button type="reset" class="btn btn-secondary" id="resetBtn" (click)="onReset()">
+        Restablecer
+      </button>
+      <button type="button" class="btn btn-outline" id="cancelBtn" (click)="onCancel()">
+        Cancelar
+      </button>
+    </div>
+  </form>
+</div>
