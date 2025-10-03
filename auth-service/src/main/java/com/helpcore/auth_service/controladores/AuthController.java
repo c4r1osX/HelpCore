@@ -1,5 +1,8 @@
 package com.helpcore.auth_service.controladores;
 
+import com.helpcore.auth_service.servicios.CookieService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,21 +26,37 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
 
     private final AuthService authService;
+    private final CookieService cookieService;
 
    @PostMapping("/register")
-   public ResponseEntity<TokenResponseDTO> register(@RequestBody final UsuarioRegisterDTO request) {
+   public ResponseEntity<TokenResponseDTO> register(@RequestBody final UsuarioRegisterDTO request, HttpServletResponse response) {
        final TokenResponseDTO token = authService.registrar(request);
+       cookieService.setAuthCookies(response, token.accessToken(), token.refreshToken());
        return ResponseEntity.ok(token);
    }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenResponseDTO> login(@RequestBody final UsuarioLoginDTO request) {
-       final TokenResponseDTO token = authService.login(request);
-       return ResponseEntity.ok(token);
-   }
+    public ResponseEntity<TokenResponseDTO> login(@RequestBody final UsuarioLoginDTO request, HttpServletResponse response) {
+        final TokenResponseDTO token = authService.login(request);
+        cookieService.setAuthCookies(response, token.accessToken(), token.refreshToken());
+        return ResponseEntity.ok(token);
+    }
 
-   @PostMapping("/refresh")
-    public TokenResponseDTO refresh(@RequestHeader(HttpHeaders.AUTHORIZATION) final String authHeader) {
-       return authService.refreshToken(authHeader);
-   } 
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request,
+                                         HttpServletResponse response) {
+        final String accessToken = cookieService.getAccessToken(request);
+        authService.logout(accessToken);
+        cookieService.clearAuthCookies(response);
+        return ResponseEntity.ok("Logout exitoso");
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<TokenResponseDTO> refresh(HttpServletRequest request, @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader, HttpServletResponse response) {
+        String refreshToken = cookieService.getRefreshToken(request);
+        final TokenResponseDTO token = authService.refreshToken(refreshToken);
+        cookieService.setAuthCookies(response, token.accessToken(), token.refreshToken());
+        return ResponseEntity.ok(token);
+    }
+
 }

@@ -13,6 +13,12 @@
                     <p>Centro de Soporte Técnico</p>
                 </div>
 
+                <!-- pa probar pe-->
+                <div class="text-center mt-3" style="background: #f8f9fa; padding: 10px; border-radius: 5px;">
+                <h5>Carlos pingamama</h5>
+                <button class="btn btn-warning me-2" (click)="testLogout()">🚪 Probar Logout</button>
+                </div>
+
                 <div class="info-card">
                     <div class="info-content">
                         <div class="info-text">
@@ -57,10 +63,10 @@
                         <p>Crea una nueva solicitud de soporte técnico</p>
 
                         <div class="action-buttons">
-                            <button class="btn text-white bg-black" onclick="createTicket('logged')">
-                                <i class="bi bi-person-check"></i> Crear con Cuenta
+                            <button class="btn text-white bg-black" [routerLink]="'/login'">
+                                <i class="bi bi-person-check"></i> Iniciar Sesión
                             </button>
-                            <button class="btn" onclick="createTicket('guest')">
+                            <button class="btn" [routerLink]="'/invitado'">
                                 <i class="bi bi-person"></i> Continuar como Invitado
                             </button>
                         </div>

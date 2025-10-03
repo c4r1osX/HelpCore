@@ -8,6 +8,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.http.ResponseCookie;
 
 import com.helpcore.auth_service.entidades.Token;
 import com.helpcore.auth_service.entidades.Usuario;
@@ -17,16 +18,15 @@ import com.helpcore.auth_service.entidades.dto.login.UsuarioRegisterDTO;
 import com.helpcore.auth_service.repositorios.TokenRepository;
 import com.helpcore.auth_service.repositorios.UsuarioRepository;
 
-
 @Service
 @RequiredArgsConstructor
 public class AuthService {
     private final UsuarioRepository usuarioRepository;
     private final TokenRepository tokenRepository;
-
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final CookieService cookieService;
 
     public TokenResponseDTO registrar(UsuarioRegisterDTO dto) {
         Usuario usuario = Usuario.builder()
@@ -53,7 +53,9 @@ public class AuthService {
         } catch (Exception ex) {
             throw new UsernameNotFoundException("Usuario o contraseña inválidos");
         }
-        Usuario usuario = usuarioRepository.findByNombreUsuario(request.getNombreUsuario()).orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+        Usuario usuario = usuarioRepository.findByNombreUsuario(request.getNombreUsuario())
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+
         var jwtToken = jwtService.generarToken(usuario);
         var refreshToken = jwtService.generarRefreshToken(usuario);
 
@@ -61,7 +63,47 @@ public class AuthService {
         guardarTokenUsuario(usuario, jwtToken);
 
         return new TokenResponseDTO(jwtToken, refreshToken);
+    }
 
+    public TokenResponseDTO refreshToken(final String refreshToken) {
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            throw new IllegalArgumentException("Token inválido");
+        }
+
+        final String nombreUsuario = jwtService.extraerUsuario(refreshToken);
+
+        if (nombreUsuario == null) {
+            throw new IllegalArgumentException("Token inválido");
+        }
+
+        final Usuario usuario = usuarioRepository.findByNombreUsuario(nombreUsuario)
+                .orElseThrow(() -> new UsernameNotFoundException(nombreUsuario));
+
+        if (!jwtService.validarToken(refreshToken, usuario)) {
+            throw new IllegalArgumentException("Token inválido");
+        }
+
+        final String nuevoToken = jwtService.generarToken(usuario);
+        final String nuevoRefreshToken = jwtService.generarRefreshToken(usuario);
+
+        removerTokensUsuario(usuario);
+        guardarTokenUsuario(usuario, nuevoToken);
+
+        return new TokenResponseDTO(nuevoToken, nuevoRefreshToken);
+    }
+
+
+    public void logout(String token) {
+        if (token == null || token.isEmpty()) {
+            return;
+        }
+
+        final Token tokenEncontrado = tokenRepository.findByToken(token).orElse(null);
+        if (tokenEncontrado != null) {
+            tokenEncontrado.setExpirado(true);
+            tokenEncontrado.setRemovido(true);
+            tokenRepository.save(tokenEncontrado);
+        }
     }
 
     private void removerTokensUsuario(final Usuario usuario) {
@@ -86,32 +128,5 @@ public class AuthService {
                 .build();
 
         tokenRepository.save(token);
-    }
-
-    public TokenResponseDTO refreshToken(final String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer")) {
-            throw new IllegalArgumentException("Token inválido");
-        }
-
-        final String refreshToken = authHeader.substring(7);
-        final String nombreUsuario = jwtService.extraerUsuario(refreshToken);
-
-        if (nombreUsuario == null) {
-            throw new IllegalArgumentException("Token inválido");
-        }
-
-        final Usuario usuario = usuarioRepository.findByNombreUsuario(nombreUsuario)
-                .orElseThrow(() -> new UsernameNotFoundException(nombreUsuario));
-
-        if (!jwtService.validarToken(refreshToken, usuario)) {
-            throw new IllegalArgumentException("Token inválido");
-        }
-
-        final String token = jwtService.generarToken(usuario);
-        removerTokensUsuario(usuario);
-
-        guardarTokenUsuario(usuario, token);
-
-        return new TokenResponseDTO(token, refreshToken);
     }
 }

@@ -4,7 +4,9 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpHeaders;
+import java.nio.charset.StandardCharsets;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -36,20 +38,21 @@ public class AuthenticationFilter implements WebFilter {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
-        String method = request.getMethod().name();
+        if (request.getMethod() == HttpMethod.OPTIONS) {
+            // Permitir preflight sin autenticación
+            return chain.filter(exchange);
+        }
 
         if (isPublicPath(path)) {
             return chain.filter(exchange);
         }
 
-        // EXTRAER JWT TOKEN DEL HEADER AUTHORIZATION
-        String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        // EXTRAER JWT TOKEN DE COOKIES
+        String token = getAccessTokenFromCookies(request);
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return handleUnauthorized(exchange, "No se encontro Authorization header format. Expected: Bearer <token>");
+        if (token == null || token.isEmpty()) {
+            return handleUnauthorized(exchange, "Missing or invalid access token");
         }
-
-        String token = authHeader.substring(7);
 
         try {
             Claims claims = validateAndParseToken(token);
@@ -75,10 +78,8 @@ public class AuthenticationFilter implements WebFilter {
             ServerHttpRequest mutatedRequest = request.mutate()
                     .header("X-User-Id", userId != null ? userId : username)
                     .header("X-User-Username", username)
-                    .header("X-User-Name", usuarioName != null ? usuarioName : username)
                     .header("X-User-Role", "USER")
                     .header("X-Auth-Source", "api-gateway")
-                    .header("X-Auth-Timestamp", String.valueOf(System.currentTimeMillis()))
                     .build();
 
             ServerWebExchange mutatedExchange = exchange.mutate().request(mutatedRequest).build();
@@ -92,48 +93,43 @@ public class AuthenticationFilter implements WebFilter {
         }
     }
 
-    private Claims validateAndParseToken(String token) throws Exception {
-        try {
-            SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-
-            Claims claims = Jwts.parser()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-
-            // VERIFICAR EXPIRACIÓN
-            Date expiration = claims.getExpiration();
-            if (expiration != null && expiration.before(new Date())) {
-                throw new Exception("Token has expired at: " + expiration);
-            }
-
-            // VERIFICAR CLAIMS REQUERIDOS
-            if (claims.getSubject() == null || claims.getSubject().trim().isEmpty()) {
-                throw new Exception("Token missing subject (username)");
-            }
-
-            // VERIFICAR CLAIM 'usuario'
-            if (claims.get("usuario") == null) {
-                throw new Exception("Token missing 'usuario' claim");
-            }
-
-            return claims;
-
-        } catch (io.jsonwebtoken.ExpiredJwtException e) {
-            throw new Exception("Token expired: " + e.getMessage());
-        } catch (io.jsonwebtoken.UnsupportedJwtException e) {
-            throw new Exception("Unsupported token: " + e.getMessage());
-        } catch (io.jsonwebtoken.MalformedJwtException e) {
-            throw new Exception("Malformed token: " + e.getMessage());
-        } catch (io.jsonwebtoken.security.SignatureException e) {
-            throw new Exception("Invalid token signature: " + e.getMessage());
-        } catch (Exception e) {
-            throw new Exception("Token validation failed: " + e.getMessage());
-        }
+    private String getAccessTokenFromCookies(ServerHttpRequest request) {
+        return request.getCookies().getFirst("accessToken") != null
+                ? request.getCookies().getFirst("accessToken").getValue()
+                : null;
     }
 
-    // VERIFICAR SI ES RUTA PÚBLICA
+
+    // Validar y parsear el JWT token
+    private Claims validateAndParseToken(String token) throws Exception {
+        SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+
+        Claims claims = Jwts.parser()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        // Verificar expiración
+        Date expiration = claims.getExpiration();
+        if (expiration != null && expiration.before(new Date())) {
+            throw new Exception("Token has expired");
+        }
+
+        // Verificar claims requeridos
+        if (claims.getSubject() == null || claims.getSubject().isEmpty()) {
+            throw new Exception("Token missing subject (username)");
+        }
+
+        // Verificar que tenga el claim 'usuario'
+        if (claims.get("usuario") == null) {
+            throw new Exception("Token missing usuario claim");
+        }
+
+        return claims;
+    }
+
+    // Verificar si una ruta es pública
     private boolean isPublicPath(String path) {
         if (path == null) return false;
 
@@ -145,8 +141,8 @@ public class AuthenticationFilter implements WebFilter {
 
         // HEALTH CHECKS Y DOCUMENTACIÓN
         if (path.equals("/health") ||
-                path.startsWith("/actuator/") ||
-                path.startsWith("/api/docs")) {
+                path.startsWith("/api/docs") ||
+                path.equals("/actuator/health")) {
             return true;
         }
 
@@ -160,6 +156,12 @@ public class AuthenticationFilter implements WebFilter {
     // MANEJAR REQUESTS NO AUTORIZADOS
     private Mono<Void> handleUnauthorized(ServerWebExchange exchange, String message) {
         ServerHttpResponse response = exchange.getResponse();
+        HttpHeaders headers = response.getHeaders();
+        headers.add("Access-Control-Allow-Origin", "http://localhost:4200");
+        headers.add("Access-Control-Allow-Credentials", "true");
+        headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+        headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization");
+
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
         response.getHeaders().add("Content-Type", "application/json");
         response.getHeaders().add("X-Error-Source", "api-gateway-auth-filter");

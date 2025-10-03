@@ -16,25 +16,40 @@
       <!-- Navbar -->
       <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container-fluid">
-
-          <!-- Icono hamburguesa SIEMPRE derecha -->
           <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse"
             data-bs-target="#navbarHelpCore" aria-controls="navbarHelpCore" aria-expanded="false"
             aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
 
-          <!-- Links -->
           <div class="collapse navbar-collapse" id="navbarHelpCore">
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
               <li class="nav-item">
-                <a class="nav-link active" href="index.html"><i></i> Inicio</a>
+                <a 
+                  class="nav-link" 
+                  [class.active]="activeLink === 'inicio'" 
+                  (click)="setActive('inicio')" 
+                  routerLink="index">
+                  <i></i> Inicio - Centro de Soporte
+                </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="faq.html"><i></i> FAQ</a>
+                <a 
+                  class="nav-link" 
+                  [class.active]="activeLink === 'faq'" 
+                  (click)="setActive('faq')" 
+                  routerLink="faq">
+                  <i></i> FAQ
+                </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="contacto.html"><i></i> Contacto</a>
+                <a 
+                  class="nav-link" 
+                  [class.active]="activeLink === 'contacto'" 
+                  (click)="setActive('contacto')" 
+                  routerLink="contacto">
+                  <i></i> Contacto
+                </a>
               </li>
 
               <!-- Login/Cerrar Sesión SOLO en móviles -->
@@ -42,11 +57,11 @@
                 <div id="user-info-mobile" class="user-info hidden">
                   <i class="bi bi-person-circle"></i>
                   <span>Usuario</span>
-                  <button class="btn btn-outline btn-sm w-100 mt-2" onclick="logout()">
+                  <button class="btn btn-outline btn-sm w-100 mt-2" (click)="onLogout()">
                     <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
                   </button>
                 </div>
-                <button id="login-btn-mobile" class="btn btn-primary w-100 mt-2" onclick="login()">
+                <button id="login-btn-mobile" class="btn btn-primary w-100 mt-2" (click)="onLogin()">
                   <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
                 </button>
               </li>
@@ -60,16 +75,15 @@
         <div id="user-info" class="user-info hidden">
           <i class="bi bi-person-circle"></i>
           <span>Usuario</span>
-          <button class="btn btn-outline btn-sm ms-2" onclick="logout()">
+          <button class="btn btn-outline btn-sm ms-2" >
             <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
           </button>
         </div>
-        <button id="login-btn" class="btn btn-sm ms-2" onclick="login()">
+        <button id="login-btn" class="btn btn-sm ms-2">
           <i class="bi bi-box-arrow-in-right"></i>
           <span>Iniciar Sesión</span>
         </button>
       </div>
-
     </div>
   </div>
 </header>
