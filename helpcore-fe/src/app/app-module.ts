@@ -1,7 +1,6 @@
 import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
-
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
 import { HttpClientModule } from '@angular/common/http';
@@ -10,6 +9,9 @@ import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Inicio } from './components/inicio/inicio';
 import { NavBar } from './components/common/nav-bar/nav-bar';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { Ticket } from './components/ticket/ticket';
+import { ConsultarEstado } from './components/consultar-estado/consultar-estado';
 
 @NgModule({
   declarations: [
@@ -17,7 +19,8 @@ import { NavBar } from './components/common/nav-bar/nav-bar';
     Login,
     Inicio,
     NavBar,
-    Ticket
+    Ticket,
+    ConsultarEstado
   ],
   imports: [
     BrowserModule,

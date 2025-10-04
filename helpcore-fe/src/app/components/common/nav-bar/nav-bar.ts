@@ -9,10 +9,15 @@ import { AuthService } from '../../../services/auth-service';
   styleUrl: './nav-bar.css'
 })
 export class NavBar {
+  activeLink: string = 'inicio';
   constructor(
     private router: Router,
     private authService: AuthService
   ) {}
+
+   setActive(link: string) {
+    this.activeLink = link;
+  }
 
   onLogin() {
     this.router.navigate(['/login']);
